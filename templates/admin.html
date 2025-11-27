@@ -23,17 +23,12 @@
                     <input type="text" id="loginUsername" required
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-                    <input type="password" id="loginPassword" required
-                           class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
-                </div>
                 <button type="submit" class="w-full px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
                     Sign In
                 </button>
             </form>
             <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                Default: admin / admin123
+                Default: admin
             </p>
         </div>
     </div>
@@ -302,6 +297,30 @@ async function checkLoginStatus() {
             showAdminPanel();
             await loadAllData();
         } else {
+            // Auto-login with default admin user
+            await autoLogin();
+        }
+    } catch (error) {
+        // Auto-login with default admin user
+        await autoLogin();
+    }
+}
+
+async function autoLogin() {
+    try {
+        const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: 'admin' })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            adminToken = data.token;
+            localStorage.setItem('adminToken', adminToken);
+            showAdminPanel();
+            await loadAllData();
+        } else {
             showLoginForm();
         }
     } catch (error) {
@@ -322,13 +341,12 @@ function showAdminPanel() {
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('loginUsername').value;
-    const password = document.getElementById('loginPassword').value;
 
     try {
         const res = await fetch('/api/admin/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username })
         });
         const data = await res.json();
 
