@@ -14,7 +14,56 @@ from utils import allowed_file, generate_slug, generate_unique_filename, create_
 api = Blueprint('api', __name__, url_prefix='/api')
 
 
-# ============== Admin Authentication ==============
+# ============== Admin Authentication (Disabled - Free Access) ==============
+
+# No authentication required - all endpoints are publicly accessible
+
+@api.route('/admin/login', methods=['POST'])
+def admin_login():
+    """Admin login - free access for everyone."""
+    # Generate session token without any checks
+    token = uuid.uuid4().hex
+    session['admin_token'] = token
+    
+    return jsonify({
+        'message': 'Login successful',
+        'token': token
+    })
+
+
+@api.route('/admin/logout', methods=['POST'])
+def admin_logout():
+    """Admin logout."""
+    session.pop('admin_token', None)
+    return jsonify({'message': 'Logged out successfully'})
+
+
+@api.route('/admin/status', methods=['GET'])
+def admin_status():
+    """Check admin status - always return logged in."""
+    return jsonify({'logged_in': True})
+
+
+@api.route('/admin/change-password', methods=['POST'])
+def change_password():
+    """Change admin password."""
+    data = request.get_json()
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+    
+    if not current_password or not new_password:
+        return jsonify({'error': 'Current and new password required'}), 400
+    
+    token = request.headers.get('X-Admin-Token') or session.get('admin_token')
+    admin = Admin.query.filter_by(session_token=token).first()
+    
+    if not admin.check_password(current_password):
+        return jsonify({'error': 'Current password is incorrect'}), 401
+    
+    admin.set_password(new_password)
+    db.session.commit()
+    
+    return jsonify({'message': 'Password changed successfully'})
 
 
 # ============== Department Routes ==============
@@ -34,7 +83,6 @@ def get_department(slug):
 
 
 @api.route('/departments', methods=['POST'])
-@admin_required
 def create_department():
     """Create a new department."""
     data = request.get_json()
@@ -72,7 +120,6 @@ def create_department():
 
 
 @api.route('/departments/<slug>', methods=['DELETE'])
-@admin_required
 def delete_department(slug):
     """Delete a department and all its contents."""
     dept = Department.query.filter_by(slug=slug).first_or_404()
@@ -134,7 +181,6 @@ def get_subject(subject_id):
 
 
 @api.route('/semesters/<int:semester_id>/subjects', methods=['POST'])
-@admin_required
 def create_subject(semester_id):
     """Create a new subject in a semester."""
     semester = Semester.query.get_or_404(semester_id)
@@ -165,7 +211,6 @@ def create_subject(semester_id):
 
 
 @api.route('/subjects/<int:subject_id>', methods=['DELETE'])
-@admin_required
 def delete_subject(subject_id):
     """Delete a subject and all its contents."""
     subject = Subject.query.get_or_404(subject_id)
@@ -208,7 +253,6 @@ def get_unit(unit_id):
 
 
 @api.route('/subjects/<int:subject_id>/units', methods=['POST'])
-@admin_required
 def create_unit(subject_id):
     """Create a new unit in a subject."""
     subject = Subject.query.get_or_404(subject_id)
@@ -238,7 +282,6 @@ def create_unit(subject_id):
 
 
 @api.route('/units/<int:unit_id>', methods=['DELETE'])
-@admin_required
 def delete_unit(unit_id):
     """Delete a unit and all its notes."""
     unit = Unit.query.get_or_404(unit_id)
@@ -416,7 +459,6 @@ def download_note(note_id):
 
 
 @api.route('/notes/<int:note_id>', methods=['DELETE'])
-@admin_required
 def delete_note(note_id):
     """Delete a note."""
     note = Note.query.get_or_404(note_id)
