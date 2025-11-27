@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="bg-white p-4 rounded shadow">
+    <div class="flex justify-between items-start">
+      <div>
+        <h1 class="text-xl font-bold text-teal-700">{{ note.title }}</h1>
+        <div class="text-xs text-gray-500">{{ note.department }} / {{ note.subject }} / {{ note.unit }}</div>
+      </div>
+      <div class="text-sm text-gray-600">{{ note.views }} views</div>
+    </div>
+
+    <div class="mt-4">
+      {% if note.is_image and note.filename %}
+        <img src="/uploads/{{ note.filename }}" alt="note" class="w-full rounded">
+      {% elif note.filename and note.filename.endswith('.pdf') %}
+        <iframe src="/uploads/{{ note.filename }}" class="w-full h-96"></iframe>
+      {% else %}
+        <div class="prose max-w-none mt-2">{{ note.content_html|safe }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mt-4 flex items-center gap-3">
+      {% if note.filename %}
+        <a href="/uploads/{{ note.filename }}" download class="px-3 py-1 bg-teal-600 text-white rounded">Download</a>
+      {% endif %}
+      <a href="/note/{{ note.id }}/qrcode" class="px-3 py-1 border rounded text-teal-600">QR</a>
+      <a href="/live?note_id={{ note.id }}" class="px-3 py-1 border rounded text-teal-600">Open Live Editor</a>
+    </div>
+  </div>
+{% endblock %}

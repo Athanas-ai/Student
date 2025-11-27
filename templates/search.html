@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Search Notes{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="font-display text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Search Notes
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+            Find the study materials you need by searching or filtering by department and subject.
+        </p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="max-w-3xl mx-auto mb-12">
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1 relative">
+                    <input type="text" id="searchInput" placeholder="Search notes, subjects..." 
+                           class="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <button id="searchBtn" class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                    Search
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Department</label>
+                    <select id="deptFilter" class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject</label>
+                    <select id="subjectFilter" class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all" disabled>
+                        <option value="">Select department first</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsContainer">
+        <!-- Initial State -->
+        <div id="initialState" class="text-center py-16">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-2">Start searching</h3>
+            <p class="text-gray-500 dark:text-gray-400">Enter a search term or select filters to find notes.</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden text-center py-16">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-500 dark:text-gray-400">Searching...</p>
+        </div>
+
+        <!-- Results Grid -->
+        <div id="resultsGrid" class="hidden">
+            <!-- Departments Results -->
+            <div id="deptResults" class="hidden mb-8">
+                <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">Departments</h2>
+                <div id="deptResultsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Subjects Results -->
+            <div id="subjectResults" class="hidden mb-8">
+                <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">Subjects</h2>
+                <div id="subjectResultsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Notes Results -->
+            <div id="noteResults" class="hidden">
+                <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">Notes</h2>
+                <div id="noteResultsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            </div>
+
+            <!-- No Results -->
+            <div id="noResults" class="hidden text-center py-16">
+                <div class="text-6xl mb-4">😕</div>
+                <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-2">No results found</h3>
+                <p class="text-gray-500 dark:text-gray-400">Try different keywords or remove some filters.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let allDepartments = [];
+let allSubjects = {};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load departments for filter
+    try {
+        const res = await fetch('/api/departments');
+        allDepartments = await res.json();
+        
+        const deptSelect = document.getElementById('deptFilter');
+        allDepartments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept.slug;
+            option.textContent = dept.name;
+            deptSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading departments:', error);
+    }
+
+    // Check for URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const q = urlParams.get('q');
+    if (q) {
+        document.getElementById('searchInput').value = q;
+        performSearch();
+    }
+});
+
+// Department filter change
+document.getElementById('deptFilter').addEventListener('change', async (e) => {
+    const deptSlug = e.target.value;
+    const subjectSelect = document.getElementById('subjectFilter');
+    
+    subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+    
+    if (!deptSlug) {
+        subjectSelect.disabled = true;
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/departments/${deptSlug}/subjects`);
+        const subjects = await res.json();
+        
+        subjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.slug;
+            option.textContent = subject.name;
+            subjectSelect.appendChild(option);
+        });
+        
+        subjectSelect.disabled = false;
+    } catch (error) {
+        console.error('Error loading subjects:', error);
+    }
+});
+
+// Search triggers
+document.getElementById('searchBtn').addEventListener('click', performSearch);
+document.getElementById('searchInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') performSearch();
+});
+document.getElementById('deptFilter').addEventListener('change', performSearch);
+document.getElementById('subjectFilter').addEventListener('change', performSearch);
+
+async function performSearch() {
+    const query = document.getElementById('searchInput').value.trim();
+    const dept = document.getElementById('deptFilter').value;
+    const subject = document.getElementById('subjectFilter').value;
+
+    if (!query && !dept && !subject) {
+        document.getElementById('initialState').classList.remove('hidden');
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('resultsGrid').classList.add('hidden');
+        return;
+    }
+
+    // Show loading
+    document.getElementById('initialState').classList.add('hidden');
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('resultsGrid').classList.add('hidden');
+
+    try {
+        const params = new URLSearchParams();
+        if (query) params.append('q', query);
+        if (dept) params.append('department', dept);
+        if (subject) params.append('subject', subject);
+
+        const res = await fetch(`/api/search?${params.toString()}`);
+        const results = await res.json();
+
+        displayResults(results);
+    } catch (error) {
+        console.error('Search error:', error);
+        showToast('Search failed. Please try again.', 'error');
+    }
+
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('resultsGrid').classList.remove('hidden');
+}
+
+function displayResults(results) {
+    const { departments, subjects, notes } = results;
+    const hasResults = departments.length > 0 || subjects.length > 0 || notes.length > 0;
+
+    // Hide all result sections first
+    document.getElementById('deptResults').classList.add('hidden');
+    document.getElementById('subjectResults').classList.add('hidden');
+    document.getElementById('noteResults').classList.add('hidden');
+    document.getElementById('noResults').classList.add('hidden');
+
+    if (!hasResults) {
+        document.getElementById('noResults').classList.remove('hidden');
+        return;
+    }
+
+    // Display departments
+    if (departments.length > 0) {
+        document.getElementById('deptResults').classList.remove('hidden');
+        document.getElementById('deptResultsGrid').innerHTML = departments.map(dept => `
+            <a href="/department/${dept.slug}" class="bg-white dark:bg-dark-card rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-dark-border flex items-center space-x-3">
+                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center text-2xl">
+                    ${dept.icon}
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-white">${dept.name}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">${dept.subject_count} subjects</p>
+                </div>
+            </a>
+        `).join('');
+    }
+
+    // Display subjects
+    if (subjects.length > 0) {
+        document.getElementById('subjectResults').classList.remove('hidden');
+        document.getElementById('subjectResultsGrid').innerHTML = subjects.map(subject => `
+            <div class="bg-white dark:bg-dark-card rounded-xl p-4 shadow-sm border border-gray-100 dark:border-dark-border">
+                <h3 class="font-medium text-gray-900 dark:text-white">${subject.name}</h3>
+                ${subject.code ? `<span class="text-xs font-mono text-primary-600 dark:text-primary-400">${subject.code}</span>` : ''}
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${subject.unit_count} units</p>
+            </div>
+        `).join('');
+    }
+
+    // Display notes
+    if (notes.length > 0) {
+        document.getElementById('noteResults').classList.remove('hidden');
+        document.getElementById('noteResultsGrid').innerHTML = notes.map(note => `
+            <a href="/note/${note.id}" class="group bg-white dark:bg-dark-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-gray-100 dark:border-dark-border">
+                <div class="h-40 bg-gray-200 dark:bg-dark-hover relative overflow-hidden">
+                    ${note.thumbnail 
+                        ? `<img src="/uploads/thumbnails/${note.thumbnail}" alt="${note.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                        : `<div class="w-full h-full flex items-center justify-center text-4xl text-gray-400">
+                            ${note.file_type === 'pdf' ? '📄' : '🖼️'}
+                           </div>`
+                    }
+                    <div class="absolute top-2 right-2">
+                        <span class="px-2 py-1 bg-white/90 dark:bg-dark-card/90 text-xs font-medium rounded-lg uppercase">
+                            ${note.file_type}
+                        </span>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-medium text-gray-900 dark:text-white line-clamp-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                        ${note.title}
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        ${note.subject_name} • ${note.unit_name}
+                    </p>
+                    <div class="flex items-center justify-between mt-3 text-xs text-gray-400">
+                        <span class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            ${note.view_count}
+                        </span>
+                        <span>${timeAgo(note.uploaded_at)}</span>
+                    </div>
+                </div>
+            </a>
+        `).join('');
+    }
+
+    // Animate results
+    anime({
+        targets: '#resultsGrid > div:not(.hidden) > div > *',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: anime.stagger(50),
+        duration: 400,
+        easing: 'easeOutCubic'
+    });
+}
+</script>
+{% endblock %}
+
+

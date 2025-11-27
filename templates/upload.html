@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Notes{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="font-display text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Upload Notes
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+            Share your study materials with fellow students. PDF and image files accepted.
+        </p>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="bg-white dark:bg-dark-card rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-dark-border">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <!-- File Upload Area -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    File *
+                </label>
+                <div id="dropZone" class="border-2 border-dashed border-gray-300 dark:border-dark-border rounded-xl p-8 text-center hover:border-primary-400 dark:hover:border-primary-500 transition-colors cursor-pointer">
+                    <input type="file" id="fileInput" name="file" accept=".pdf,.png,.jpg,.jpeg" required class="hidden">
+                    <div id="dropZoneContent">
+                        <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 mb-2">
+                            <span class="text-primary-600 dark:text-primary-400 font-medium">Click to upload</span> or drag and drop
+                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-500">
+                            PDF, PNG, JPG up to 16MB
+                        </p>
+                    </div>
+                    <div id="filePreview" class="hidden">
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center text-2xl" id="fileIcon">📄</div>
+                            <div class="text-left">
+                                <p class="font-medium text-gray-900 dark:text-white" id="fileName">file.pdf</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" id="fileSize">0 KB</p>
+                            </div>
+                            <button type="button" id="removeFile" class="p-2 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="mb-6">
+                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Title *
+                </label>
+                <input type="text" id="title" name="title" required
+                       placeholder="e.g., Data Structures - Trees and Graphs"
+                       class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+            </div>
+
+            <!-- Description -->
+            <div class="mb-6">
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Description
+                </label>
+                <textarea id="description" name="description" rows="3"
+                          placeholder="Brief description of the notes..."
+                          class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"></textarea>
+            </div>
+
+            <!-- Department -->
+            <div class="mb-6">
+                <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Department *
+                </label>
+                <select id="department" name="department" required
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all">
+                    <option value="">Select a department</option>
+                </select>
+            </div>
+
+            <!-- Semester -->
+            <div class="mb-6">
+                <label for="semester" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Semester *
+                </label>
+                <select id="semester" name="semester" required disabled
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all">
+                    <option value="">Select department first</option>
+                </select>
+            </div>
+
+            <!-- Subject -->
+            <div class="mb-6">
+                <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Subject *
+                </label>
+                <select id="subject" name="subject" required disabled
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all">
+                    <option value="">Select semester first</option>
+                </select>
+            </div>
+
+            <!-- Unit -->
+            <div class="mb-8">
+                <label for="unit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Unit *
+                </label>
+                <select id="unit" name="unit" required disabled
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all">
+                    <option value="">Select subject first</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submitBtn" class="w-full px-6 py-4 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                Upload Note
+            </button>
+        </form>
+
+        <!-- Progress Bar -->
+        <div id="progressContainer" class="hidden mt-6">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Uploading...</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400" id="progressPercent">0%</span>
+            </div>
+            <div class="h-2 bg-gray-200 dark:bg-dark-hover rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-primary-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="mt-8 p-6 bg-primary-50 dark:bg-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800">
+        <h3 class="font-display font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Tips for Uploading
+        </h3>
+        <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+            <li>• Use clear, descriptive titles</li>
+            <li>• Make sure your notes are legible</li>
+            <li>• PDF files work best for multi-page documents</li>
+            <li>• Images should be high quality for readability</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const dropZoneContent = document.getElementById('dropZoneContent');
+const filePreview = document.getElementById('filePreview');
+const uploadForm = document.getElementById('uploadForm');
+
+// Load departments
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await fetch('/api/departments');
+        const departments = await res.json();
+        
+        const select = document.getElementById('department');
+        departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept.slug;
+            option.textContent = dept.name;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading departments:', error);
+    }
+});
+
+// Department change -> load semesters
+document.getElementById('department').addEventListener('change', async (e) => {
+    const deptSlug = e.target.value;
+    const semesterSelect = document.getElementById('semester');
+    const subjectSelect = document.getElementById('subject');
+    const unitSelect = document.getElementById('unit');
+    
+    semesterSelect.innerHTML = '<option value="">Select a semester</option>';
+    subjectSelect.innerHTML = '<option value="">Select semester first</option>';
+    unitSelect.innerHTML = '<option value="">Select subject first</option>';
+    semesterSelect.disabled = true;
+    subjectSelect.disabled = true;
+    unitSelect.disabled = true;
+    
+    if (!deptSlug) return;
+
+    try {
+        const res = await fetch(`/api/departments/${deptSlug}/semesters`);
+        const semesters = await res.json();
+        
+        semesters.forEach(sem => {
+            const option = document.createElement('option');
+            option.value = sem.id;
+            option.textContent = `Semester ${sem.number}`;
+            semesterSelect.appendChild(option);
+        });
+        
+        semesterSelect.disabled = false;
+    } catch (error) {
+        console.error('Error loading semesters:', error);
+    }
+});
+
+// Semester change -> load subjects
+document.getElementById('semester').addEventListener('change', async (e) => {
+    const semesterId = e.target.value;
+    const subjectSelect = document.getElementById('subject');
+    const unitSelect = document.getElementById('unit');
+    
+    subjectSelect.innerHTML = '<option value="">Select a subject</option>';
+    unitSelect.innerHTML = '<option value="">Select subject first</option>';
+    subjectSelect.disabled = true;
+    unitSelect.disabled = true;
+    
+    if (!semesterId) return;
+
+    try {
+        const res = await fetch(`/api/semesters/${semesterId}/subjects`);
+        const subjects = await res.json();
+        
+        if (subjects.length === 0) {
+            subjectSelect.innerHTML = '<option value="">No subjects in this semester</option>';
+            return;
+        }
+        
+        subjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.id;
+            option.textContent = subject.name;
+            subjectSelect.appendChild(option);
+        });
+        
+        subjectSelect.disabled = false;
+    } catch (error) {
+        console.error('Error loading subjects:', error);
+    }
+});
+
+// Subject change -> load units
+document.getElementById('subject').addEventListener('change', async (e) => {
+    const subjectId = e.target.value;
+    const unitSelect = document.getElementById('unit');
+    
+    unitSelect.innerHTML = '<option value="">Select a unit</option>';
+    unitSelect.disabled = true;
+    
+    if (!subjectId) return;
+
+    try {
+        const res = await fetch(`/api/subjects/${subjectId}/units`);
+        const units = await res.json();
+        
+        if (units.length === 0) {
+            unitSelect.innerHTML = '<option value="">No units in this subject</option>';
+            return;
+        }
+        
+        units.forEach(unit => {
+            const option = document.createElement('option');
+            option.value = unit.id;
+            option.textContent = `Unit ${unit.number}: ${unit.name}`;
+            unitSelect.appendChild(option);
+        });
+        
+        unitSelect.disabled = false;
+    } catch (error) {
+        console.error('Error loading units:', error);
+    }
+});
+
+// File drop zone
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-primary-400', 'bg-primary-50', 'dark:bg-primary-900/10');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('border-primary-400', 'bg-primary-50', 'dark:bg-primary-900/10');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-primary-400', 'bg-primary-50', 'dark:bg-primary-900/10');
+    
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        handleFile(file);
+    }
+});
+
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        handleFile(file);
+    }
+});
+
+function handleFile(file) {
+    const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+    
+    if (!validTypes.includes(file.type)) {
+        showToast('Invalid file type. Please upload PDF, PNG, or JPG files.', 'error');
+        return;
+    }
+    
+    if (file.size > 16 * 1024 * 1024) {
+        showToast('File too large. Maximum size is 16MB.', 'error');
+        return;
+    }
+    
+    // Create a DataTransfer to set the file
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+    
+    // Show preview
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    document.getElementById('fileIcon').textContent = file.type === 'application/pdf' ? '📄' : '🖼️';
+    
+    // Auto-fill title if empty
+    if (!document.getElementById('title').value) {
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+        document.getElementById('title').value = nameWithoutExt;
+    }
+    
+    dropZoneContent.classList.add('hidden');
+    filePreview.classList.remove('hidden');
+}
+
+document.getElementById('removeFile').addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.value = '';
+    dropZoneContent.classList.remove('hidden');
+    filePreview.classList.add('hidden');
+});
+
+// Form submission
+uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const unitId = document.getElementById('unit').value;
+    if (!unitId) {
+        showToast('Please select a unit', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    formData.append('title', document.getElementById('title').value);
+    formData.append('description', document.getElementById('description').value);
+    
+    // Show progress
+    document.getElementById('progressContainer').classList.remove('hidden');
+    document.getElementById('submitBtn').disabled = true;
+    
+    try {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('progressPercent').textContent = percent + '%';
+            }
+        });
+        
+        xhr.onload = function() {
+            if (xhr.status === 201) {
+                const note = JSON.parse(xhr.responseText);
+                showToast('Note uploaded successfully!');
+                setTimeout(() => {
+                    window.location.href = `/note/${note.id}`;
+                }, 1000);
+            } else {
+                const error = JSON.parse(xhr.responseText);
+                throw new Error(error.error || 'Upload failed');
+            }
+        };
+        
+        xhr.onerror = function() {
+            throw new Error('Network error');
+        };
+        
+        xhr.open('POST', `/api/units/${unitId}/notes`);
+        xhr.send(formData);
+        
+    } catch (error) {
+        console.error('Upload error:', error);
+        showToast(error.message || 'Upload failed. Please try again.', 'error');
+        document.getElementById('progressContainer').classList.add('hidden');
+        document.getElementById('submitBtn').disabled = false;
+    }
+});
+</script>
+{% endblock %}

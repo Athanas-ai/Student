@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Subject{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-6 flex-wrap gap-y-1" id="breadcrumb">
+        <a href="/" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <a href="/department/{{ dept_slug }}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors" id="deptBreadcrumb">Department</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <span class="text-gray-600 dark:text-gray-400" id="semBreadcrumb">Semester</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <span class="text-gray-900 dark:text-white font-medium" id="subjectBreadcrumb">Loading...</span>
+    </nav>
+
+    <!-- Subject Header -->
+    <div class="bg-white dark:bg-dark-card rounded-3xl p-8 mb-8 shadow-sm border border-gray-100 dark:border-dark-border" id="subjectHeader">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <div class="flex items-center space-x-3 mb-2">
+                    <h1 class="font-display text-3xl md:text-4xl font-bold text-gray-900 dark:text-white" id="subjectName">
+                        Loading...
+                    </h1>
+                    <span id="subjectCode" class="hidden px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-mono rounded-lg"></span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl" id="subjectDescription">
+                    Loading subject information...
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                <a href="/upload" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    Upload Notes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Units Accordion -->
+    <div class="space-y-4" id="unitsContainer">
+        <!-- Loading skeletons -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-1/3"></div>
+        </div>
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-1/3"></div>
+        </div>
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-1/3"></div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16">
+        <div class="text-6xl mb-4">📝</div>
+        <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-2">No units found</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">This subject doesn't have any units yet.</p>
+        <a href="/upload" class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+            Upload the first note
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const deptSlug = '{{ dept_slug }}';
+const semesterId = {{ semester_id }};
+const subjectSlug = '{{ subject_slug }}';
+let subjectId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Fetch department info for breadcrumb
+        const deptRes = await fetch(`/api/departments/${deptSlug}`);
+        const dept = await deptRes.json();
+        document.getElementById('deptBreadcrumb').textContent = dept.name;
+
+        // Fetch semester info
+        const semRes = await fetch(`/api/semesters/${semesterId}`);
+        const semester = await semRes.json();
+        document.getElementById('semBreadcrumb').textContent = `Semester ${semester.number}`;
+
+        // Fetch subjects to find current one
+        const subjectsRes = await fetch(`/api/semesters/${semesterId}/subjects`);
+        const subjects = await subjectsRes.json();
+        const subject = subjects.find(s => s.slug === subjectSlug);
+
+        if (!subject) throw new Error('Subject not found');
+
+        subjectId = subject.id;
+
+        // Update header
+        document.getElementById('subjectBreadcrumb').textContent = subject.name;
+        document.getElementById('subjectName').textContent = subject.name;
+        document.getElementById('subjectDescription').textContent = subject.description || 'Explore units and notes for this subject.';
+        
+        if (subject.code) {
+            const codeEl = document.getElementById('subjectCode');
+            codeEl.textContent = subject.code;
+            codeEl.classList.remove('hidden');
+        }
+
+        // Fetch units
+        const unitsRes = await fetch(`/api/subjects/${subject.id}/units`);
+        const units = await unitsRes.json();
+
+        renderUnits(units);
+
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('unitsContainer').innerHTML = `
+            <div class="text-center py-12">
+                <div class="text-6xl mb-4">😕</div>
+                <p class="text-gray-500 dark:text-gray-400">Subject not found or an error occurred.</p>
+                <a href="/department/${deptSlug}" class="inline-flex items-center mt-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+                    Go back to department
+                </a>
+            </div>
+        `;
+    }
+});
+
+async function renderUnits(units) {
+    const container = document.getElementById('unitsContainer');
+    const emptyState = document.getElementById('emptyState');
+
+    if (units.length === 0) {
+        container.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+    }
+
+    container.innerHTML = '';
+
+    for (const unit of units) {
+        // Fetch notes for this unit
+        const notesRes = await fetch(`/api/units/${unit.id}/notes`);
+        const notes = await notesRes.json();
+
+        const unitEl = document.createElement('div');
+        unitEl.className = 'bg-white dark:bg-dark-card rounded-2xl shadow-sm border border-gray-100 dark:border-dark-border overflow-hidden';
+        unitEl.innerHTML = `
+            <button class="unit-header w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors" data-unit-id="${unit.id}">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center text-primary-600 dark:text-primary-400 font-display font-bold">
+                        ${unit.number}
+                    </div>
+                    <div>
+                        <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white">
+                            ${unit.name}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            ${notes.length} note${notes.length !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 transition-transform unit-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div class="unit-content hidden px-6 pb-6">
+                ${notes.length > 0 ? `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                        ${notes.map(note => `
+                            <a href="/note/${note.id}" class="group bg-gray-50 dark:bg-dark-bg rounded-xl overflow-hidden hover:shadow-md transition-all border border-gray-100 dark:border-dark-border">
+                                <div class="h-32 bg-gray-200 dark:bg-dark-hover relative overflow-hidden">
+                                    ${note.thumbnail 
+                                        ? `<img src="/uploads/thumbnails/${note.thumbnail}" alt="${note.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                                        : `<div class="w-full h-full flex items-center justify-center text-3xl text-gray-400">
+                                            ${note.file_type === 'pdf' ? '📄' : '🖼️'}
+                                           </div>`
+                                    }
+                                    <div class="absolute top-2 right-2">
+                                        <span class="px-2 py-0.5 bg-white/90 dark:bg-dark-card/90 text-xs font-medium rounded uppercase">
+                                            ${note.file_type}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="p-3">
+                                    <h4 class="font-medium text-gray-900 dark:text-white line-clamp-1 text-sm group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                                        ${note.title}
+                                    </h4>
+                                    <div class="flex items-center justify-between mt-2 text-xs text-gray-400">
+                                        <span class="flex items-center">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                            ${note.view_count}
+                                        </span>
+                                        <span>${formatFileSize(note.file_size)}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        `).join('')}
+                    </div>
+                    <a href="/department/${deptSlug}/semester/${semesterId}/subject/${subjectSlug}/unit/${unit.id}" class="inline-flex items-center mt-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 text-sm font-medium">
+                        View all notes
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                ` : `
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <p class="mb-2">No notes in this unit yet.</p>
+                        <a href="/upload" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+                            Upload notes →
+                        </a>
+                    </div>
+                `}
+            </div>
+        `;
+
+        container.appendChild(unitEl);
+    }
+
+    // Add click handlers for accordion
+    document.querySelectorAll('.unit-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const content = header.nextElementSibling;
+            const chevron = header.querySelector('.unit-chevron');
+            const isOpen = !content.classList.contains('hidden');
+
+            // Close all others
+            document.querySelectorAll('.unit-content').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('.unit-chevron').forEach(c => c.classList.remove('rotate-180'));
+
+            if (!isOpen) {
+                content.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+                
+                anime({
+                    targets: content,
+                    opacity: [0, 1],
+                    translateY: [-10, 0],
+                    duration: 300,
+                    easing: 'easeOutCubic'
+                });
+            }
+        });
+    });
+
+    // Open first unit by default
+    const firstHeader = document.querySelector('.unit-header');
+    if (firstHeader) {
+        firstHeader.click();
+    }
+
+    // Animate units
+    anime({
+        targets: '#unitsContainer > div',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: anime.stagger(100),
+        duration: 500,
+        easing: 'easeOutCubic'
+    });
+}
+</script>
+{% endblock %}

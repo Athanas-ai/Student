@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Live Notes{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+            <h1 class="font-display text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center">
+                <span class="relative flex h-3 w-3 mr-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                Live Notes
+            </h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">
+                Collaborate in real-time with fellow students. Create or join a live note session.
+            </p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <button id="createNoteBtn" class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl shadow-lg hover:shadow-primary-500/25 transition-all">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Create Live Note
+            </button>
+        </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-2xl p-6 mb-8">
+        <div class="flex items-start space-x-4">
+            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/40 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                ✏️
+            </div>
+            <div>
+                <h3 class="font-display font-semibold text-gray-900 dark:text-white mb-1">Real-time Collaboration</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                    Create a live note and share the link with classmates. Everyone can type together in real-time.
+                    Changes are automatically saved - no login required!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Notes Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="liveNotesGrid">
+        <!-- Loading skeletons -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-4"></div>
+            <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-full mb-2"></div>
+            <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-2/3"></div>
+        </div>
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-4"></div>
+            <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-full mb-2"></div>
+            <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-2/3"></div>
+        </div>
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-4"></div>
+            <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-full mb-2"></div>
+            <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-2/3"></div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16">
+        <div class="text-6xl mb-4">📝</div>
+        <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-2">No live notes yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">Be the first to start a collaborative note session!</p>
+        <button id="emptyCreateBtn" class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Create First Live Note
+        </button>
+    </div>
+</div>
+
+<!-- Create Note Modal -->
+<div id="createModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card rounded-2xl p-6 max-w-md w-full">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white">Create Live Note</h3>
+            <button id="closeModal" class="p-2 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <form id="createForm">
+            <div class="mb-4">
+                <label for="noteTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Note Title *
+                </label>
+                <input type="text" id="noteTitle" name="title" required
+                       placeholder="e.g., Physics Lecture Notes - Week 5"
+                       class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+            </div>
+            <button type="submit" class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                Create & Start Editing
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const createModal = document.getElementById('createModal');
+const createForm = document.getElementById('createForm');
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await fetch('/api/live-notes');
+        const notes = await res.json();
+        renderLiveNotes(notes);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+function renderLiveNotes(notes) {
+    const grid = document.getElementById('liveNotesGrid');
+    const emptyState = document.getElementById('emptyState');
+
+    if (notes.length === 0) {
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+    }
+
+    grid.innerHTML = notes.map(note => `
+        <a href="/live/${note.slug}" class="group bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 dark:border-dark-border">
+            <div class="flex items-start justify-between mb-4">
+                <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2">
+                    ${note.title}
+                </h3>
+                ${note.active_editors > 0 ? `
+                    <span class="flex items-center px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-lg">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
+                        ${note.active_editors} editing
+                    </span>
+                ` : ''}
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-3">
+                ${note.content ? stripHtml(note.content).substring(0, 150) + '...' : 'No content yet. Click to start editing.'}
+            </div>
+            <div class="flex items-center justify-between text-sm text-gray-400">
+                <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    ${note.view_count} views
+                </span>
+                <span>Updated ${timeAgo(note.updated_at)}</span>
+            </div>
+        </a>
+    `).join('');
+
+    anime({
+        targets: '#liveNotesGrid > a',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: anime.stagger(100),
+        duration: 500,
+        easing: 'easeOutCubic'
+    });
+}
+
+function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+}
+
+// Modal controls
+document.getElementById('createNoteBtn').addEventListener('click', () => {
+    createModal.classList.remove('hidden');
+    document.getElementById('noteTitle').focus();
+});
+
+document.getElementById('emptyCreateBtn')?.addEventListener('click', () => {
+    createModal.classList.remove('hidden');
+    document.getElementById('noteTitle').focus();
+});
+
+document.getElementById('closeModal').addEventListener('click', () => {
+    createModal.classList.add('hidden');
+});
+
+createModal.addEventListener('click', (e) => {
+    if (e.target === createModal) {
+        createModal.classList.add('hidden');
+    }
+});
+
+// Create form submission
+createForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const title = document.getElementById('noteTitle').value.trim();
+    if (!title) return;
+
+    try {
+        const res = await fetch('/api/live-notes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title })
+        });
+
+        if (!res.ok) throw new Error('Failed to create note');
+        
+        const note = await res.json();
+        window.location.href = `/live/${note.slug}`;
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Failed to create note. Please try again.', 'error');
+    }
+});
+</script>
+{% endblock %}
+
+

@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative overflow-hidden bg-gradient-teal py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <!-- Hero Text -->
+            <div class="text-center lg:text-left">
+                <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight" id="heroTitle">
+                    Share Notes,
+                    <span class="gradient-text">Learn Together</span>
+                </h1>
+                <p class="mt-6 text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-xl mx-auto lg:mx-0" id="heroSubtitle">
+                    A collaborative platform where students share notes, collaborate in real-time, 
+                    and help each other succeed. No login required!
+                </p>
+                <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start" id="heroButtons">
+                    <a href="#departments" class="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl shadow-lg hover:shadow-primary-500/25 transition-all">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        Browse Notes
+                    </a>
+                    <a href="/live-notes" class="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-dark-hover text-gray-900 dark:text-white font-medium rounded-xl shadow-lg transition-all border border-gray-200 dark:border-dark-border">
+                        <span class="relative flex h-2 w-2 mr-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                        Live Collaboration
+                    </a>
+                </div>
+                
+                <!-- Stats -->
+                <div class="mt-12 grid grid-cols-3 gap-8" id="statsContainer">
+                    <div class="text-center">
+                        <div class="font-display text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-400" id="statNotes">0</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Notes Shared</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-display text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-400" id="statDepts">0</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Departments</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-display text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-400" id="statViews">0</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Total Views</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Illustration -->
+            <div class="relative hidden lg:block" id="heroIllustration">
+                <div class="relative z-10">
+                    <!-- Floating cards animation -->
+                    <div class="absolute top-0 right-0 w-64 h-80 bg-white dark:bg-dark-card rounded-2xl shadow-2xl p-6 transform rotate-6 card-float-1">
+                        <div class="h-4 bg-primary-200 dark:bg-primary-900 rounded w-3/4 mb-4"></div>
+                        <div class="h-3 bg-gray-200 dark:bg-dark-hover rounded w-full mb-2"></div>
+                        <div class="h-3 bg-gray-200 dark:bg-dark-hover rounded w-5/6 mb-2"></div>
+                        <div class="h-3 bg-gray-200 dark:bg-dark-hover rounded w-4/6 mb-6"></div>
+                        <div class="h-24 bg-primary-100 dark:bg-primary-900/30 rounded-lg"></div>
+                    </div>
+                    <div class="absolute top-20 left-0 w-64 h-80 bg-white dark:bg-dark-card rounded-2xl shadow-2xl p-6 transform -rotate-6 card-float-2">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white">📚</div>
+                            <div>
+                                <div class="h-3 bg-gray-300 dark:bg-dark-hover rounded w-20"></div>
+                                <div class="h-2 bg-gray-200 dark:bg-dark-hover rounded w-16 mt-1"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-gray-200 dark:bg-dark-hover rounded w-full"></div>
+                            <div class="h-3 bg-gray-200 dark:bg-dark-hover rounded w-4/5"></div>
+                            <div class="h-3 bg-gray-200 dark:bg-dark-hover rounded w-full"></div>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 right-12 w-56 h-64 bg-primary-500 rounded-2xl shadow-2xl p-6 transform rotate-3 card-float-3">
+                        <div class="text-white">
+                            <div class="text-lg font-display font-semibold mb-2">Live Editing</div>
+                            <div class="flex items-center space-x-2 mb-4">
+                                <div class="w-6 h-6 bg-white/20 rounded-full"></div>
+                                <div class="w-6 h-6 bg-white/20 rounded-full -ml-2"></div>
+                                <div class="w-6 h-6 bg-white/20 rounded-full -ml-2"></div>
+                                <span class="text-sm text-white/80">+5 editing</span>
+                            </div>
+                            <div class="h-2 bg-white/20 rounded w-full mb-2"></div>
+                            <div class="h-2 bg-white/20 rounded w-3/4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wave decoration -->
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" class="fill-gray-50 dark:fill-dark-bg"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- Departments Section -->
+<section id="departments" class="py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                Browse by Department
+            </h2>
+            <p class="mt-4 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Explore notes organized by departments and subjects. Find exactly what you need for your studies.
+            </p>
+        </div>
+
+        <!-- Departments Grid -->
+        <div id="departmentsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading skeleton -->
+            <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+                <div class="w-16 h-16 bg-gray-200 dark:bg-dark-hover rounded-xl mb-4"></div>
+                <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-full mb-4"></div>
+                <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-1/2"></div>
+            </div>
+            <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+                <div class="w-16 h-16 bg-gray-200 dark:bg-dark-hover rounded-xl mb-4"></div>
+                <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-full mb-4"></div>
+                <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-1/2"></div>
+            </div>
+            <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+                <div class="w-16 h-16 bg-gray-200 dark:bg-dark-hover rounded-xl mb-4"></div>
+                <div class="h-6 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-full mb-4"></div>
+                <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-1/2"></div>
+            </div>
+        </div>
+    </div>
+  </section>
+
+<!-- Recent Uploads Section -->
+<section class="py-16 bg-white dark:bg-dark-card">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="font-display text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                    Recent Uploads
+                </h2>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">
+                    Fresh study materials added by fellow students
+                </p>
+            </div>
+            <a href="/search" class="hidden sm:inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors">
+                View All
+                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Recent Notes Grid -->
+        <div id="recentNotesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Loading skeletons -->
+            <div class="bg-gray-50 dark:bg-dark-bg rounded-xl overflow-hidden animate-pulse">
+                <div class="h-40 bg-gray-200 dark:bg-dark-hover"></div>
+                <div class="p-4">
+                    <div class="h-5 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-1/2"></div>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-dark-bg rounded-xl overflow-hidden animate-pulse">
+                <div class="h-40 bg-gray-200 dark:bg-dark-hover"></div>
+                <div class="p-4">
+                    <div class="h-5 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-1/2"></div>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-dark-bg rounded-xl overflow-hidden animate-pulse">
+                <div class="h-40 bg-gray-200 dark:bg-dark-hover"></div>
+                <div class="p-4">
+                    <div class="h-5 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-1/2"></div>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-dark-bg rounded-xl overflow-hidden animate-pulse">
+                <div class="h-40 bg-gray-200 dark:bg-dark-hover"></div>
+                <div class="p-4">
+                    <div class="h-5 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-1/2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </section>
+
+<!-- Most Viewed Section -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+                <h2 class="font-display text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                    🔥 Most Viewed
+                </h2>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">
+                    Popular notes that students love
+                </p>
+            </div>
+        </div>
+
+        <!-- Popular Notes Grid -->
+        <div id="popularNotesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Will be populated by JavaScript -->
+        </div>
+          </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-16 md:py-24">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-3xl p-8 md:p-12 shadow-2xl shadow-primary-500/20">
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-4">
+                Ready to Share Your Notes?
+            </h2>
+            <p class="text-primary-100 text-lg mb-8 max-w-xl mx-auto">
+                Help your fellow students by uploading your study materials. No sign-up required!
+            </p>
+            <a href="/upload" class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-600 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                Upload Notes
+            </a>
+        </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // Animate hero elements
+    anime.timeline({
+        easing: 'easeOutExpo'
+    })
+    .add({
+        targets: '#heroTitle',
+        opacity: [0, 1],
+        translateY: [30, 0],
+        duration: 800
+    })
+    .add({
+        targets: '#heroSubtitle',
+        opacity: [0, 1],
+        translateY: [30, 0],
+        duration: 800
+    }, '-=600')
+    .add({
+        targets: '#heroButtons',
+        opacity: [0, 1],
+        translateY: [30, 0],
+        duration: 800
+    }, '-=600')
+    .add({
+        targets: '#statsContainer',
+        opacity: [0, 1],
+        translateY: [30, 0],
+        duration: 800
+    }, '-=600');
+
+    // Floating cards animation
+    anime({
+        targets: '.card-float-1',
+        translateY: [-10, 10],
+        duration: 3000,
+        easing: 'easeInOutSine',
+        direction: 'alternate',
+        loop: true
+    });
+
+    anime({
+        targets: '.card-float-2',
+        translateY: [10, -10],
+        duration: 3500,
+        easing: 'easeInOutSine',
+        direction: 'alternate',
+        loop: true
+    });
+
+    anime({
+        targets: '.card-float-3',
+        translateY: [-5, 15],
+        duration: 4000,
+        easing: 'easeInOutSine',
+        direction: 'alternate',
+        loop: true
+    });
+
+    // Fetch and display data
+    try {
+        // Fetch stats
+        const statsRes = await fetch('/api/stats');
+        const stats = await statsRes.json();
+        
+        // Animate stat numbers
+        animateValue('statNotes', 0, stats.total_notes, 1500);
+        animateValue('statDepts', 0, stats.total_departments, 1500);
+        animateValue('statViews', 0, stats.total_views, 1500);
+
+        // Fetch departments
+        const deptsRes = await fetch('/api/departments');
+        const departments = await deptsRes.json();
+        renderDepartments(departments);
+
+        // Fetch recent notes
+        const recentRes = await fetch('/api/notes/recent?limit=8');
+        const recentNotes = await recentRes.json();
+        renderNotes('recentNotesGrid', recentNotes);
+
+        // Fetch popular notes
+        const popularRes = await fetch('/api/notes/popular?limit=8');
+        const popularNotes = await popularRes.json();
+        renderNotes('popularNotesGrid', popularNotes);
+
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
+});
+
+function animateValue(elementId, start, end, duration) {
+    const element = document.getElementById(elementId);
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= end) {
+            element.textContent = end.toLocaleString();
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current).toLocaleString();
+        }
+    }, 16);
+}
+
+function renderDepartments(departments) {
+    const grid = document.getElementById('departmentsGrid');
+    
+    if (departments.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <div class="text-6xl mb-4">📚</div>
+                <p class="text-gray-500 dark:text-gray-400">No departments yet. Check back soon!</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = departments.map(dept => `
+        <a href="/department/${dept.slug}" class="group bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 dark:border-dark-border">
+            <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                ${dept.icon}
+            </div>
+            <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                ${dept.name}
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                ${dept.description || 'Explore subjects and notes in this department.'}
+            </p>
+            <div class="flex items-center text-sm text-primary-600 dark:text-primary-400">
+                <span>${dept.subject_count} subjects</span>
+                <svg class="w-4 h-4 ml-auto group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </div>
+        </a>
+    `).join('');
+
+    // Animate cards
+    anime({
+        targets: '#departmentsGrid > a',
+        opacity: [0, 1],
+        translateY: [30, 0],
+        delay: anime.stagger(100),
+        duration: 600,
+        easing: 'easeOutCubic'
+    });
+}
+
+function renderNotes(containerId, notes) {
+    const grid = document.getElementById(containerId);
+    
+    if (notes.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <div class="text-6xl mb-4">📝</div>
+                <p class="text-gray-500 dark:text-gray-400">No notes uploaded yet. Be the first!</p>
+                <a href="/upload" class="inline-flex items-center mt-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+                    Upload Notes
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = notes.map(note => `
+        <a href="/note/${note.id}" class="group bg-gray-50 dark:bg-dark-bg rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all card-hover border border-gray-100 dark:border-dark-border">
+            <div class="h-40 bg-gray-200 dark:bg-dark-hover relative overflow-hidden">
+                ${note.thumbnail 
+                    ? `<img src="/uploads/thumbnails/${note.thumbnail}" alt="${note.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                    : `<div class="w-full h-full flex items-center justify-center text-4xl text-gray-400">
+                        ${note.file_type === 'pdf' ? '📄' : '🖼️'}
+                       </div>`
+                }
+                <div class="absolute top-2 right-2">
+                    <span class="px-2 py-1 bg-white/90 dark:bg-dark-card/90 text-xs font-medium rounded-lg uppercase">
+                        ${note.file_type}
+                    </span>
+                </div>
+            </div>
+            <div class="p-4">
+                <h3 class="font-medium text-gray-900 dark:text-white line-clamp-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    ${note.title}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    ${note.subject_name || 'Unknown Subject'}
+                </p>
+                <div class="flex items-center justify-between mt-3 text-xs text-gray-400">
+                    <span class="flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        ${note.view_count || 0}
+                    </span>
+                    <span>${timeAgo(note.uploaded_at)}</span>
+                </div>
+            </div>
+        </a>
+    `).join('');
+
+    // Animate cards
+    anime({
+        targets: `#${containerId} > a`,
+        opacity: [0, 1],
+        translateY: [30, 0],
+        delay: anime.stagger(100),
+        duration: 600,
+        easing: 'easeOutCubic'
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Notes{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-6 flex-wrap gap-y-1" id="breadcrumb">
+        <a href="/" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <a href="/department/{{ dept_slug }}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors" id="deptBreadcrumb">Department</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <span class="text-gray-600 dark:text-gray-400" id="semBreadcrumb">Semester</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <a href="/department/{{ dept_slug }}/semester/{{ semester_id }}/subject/{{ subject_slug }}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors" id="subjectBreadcrumb">Subject</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <span class="text-gray-900 dark:text-white font-medium" id="unitBreadcrumb">Unit</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+            <h1 class="font-display text-3xl font-bold text-gray-900 dark:text-white" id="unitName">
+                Loading...
+            </h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400" id="unitDescription">
+                Loading unit information...
+            </p>
+        </div>
+        <div class="mt-4 md:mt-0 flex items-center space-x-3">
+            <button id="shareBtn" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-dark-card hover:bg-gray-200 dark:hover:bg-dark-hover text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                </svg>
+                Share
+            </button>
+            <a href="/upload" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                Upload
+            </a>
+        </div>
+    </div>
+
+    <!-- Notes Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="notesGrid">
+        <!-- Loading skeletons -->
+        <div class="bg-white dark:bg-dark-card rounded-xl overflow-hidden animate-pulse">
+            <div class="h-48 bg-gray-200 dark:bg-dark-hover"></div>
+            <div class="p-4">
+                <div class="h-5 bg-gray-200 dark:bg-dark-hover rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-100 dark:bg-dark-hover rounded w-1/2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16">
+        <div class="text-6xl mb-4">📝</div>
+        <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-2">No notes yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Be the first to share notes for this unit!</p>
+        <a href="/upload" class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+            Upload Notes
+        </a>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 max-w-sm w-full">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white">Share this page</h3>
+                <button id="closeQrModal" class="p-2 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="qrCode" class="flex justify-center mb-4"></div>
+            <div class="flex items-center space-x-2">
+                <input type="text" id="shareUrl" readonly class="flex-1 px-3 py-2 bg-gray-100 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg text-sm">
+                <button id="copyUrl" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    Copy
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const deptSlug = '{{ dept_slug }}';
+const semesterId = {{ semester_id }};
+const subjectSlug = '{{ subject_slug }}';
+const unitId = {{ unit_id }};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Fetch unit info
+        const unitRes = await fetch(`/api/units/${unitId}`);
+        const unit = await unitRes.json();
+
+        document.getElementById('unitBreadcrumb').textContent = unit.name;
+        document.getElementById('unitName').textContent = unit.name;
+        document.getElementById('unitDescription').textContent = unit.description || 'Browse notes for this unit.';
+
+        // Fetch breadcrumb info
+        const deptRes = await fetch(`/api/departments/${deptSlug}`);
+        const dept = await deptRes.json();
+        document.getElementById('deptBreadcrumb').textContent = dept.name;
+
+        const semRes = await fetch(`/api/semesters/${semesterId}`);
+        const semester = await semRes.json();
+        document.getElementById('semBreadcrumb').textContent = `Semester ${semester.number}`;
+
+        const subjectsRes = await fetch(`/api/semesters/${semesterId}/subjects`);
+        const subjects = await subjectsRes.json();
+        const subject = subjects.find(s => s.slug === subjectSlug);
+        if (subject) {
+            document.getElementById('subjectBreadcrumb').textContent = subject.name;
+        }
+
+        // Fetch notes
+        const notesRes = await fetch(`/api/units/${unitId}/notes`);
+        const notes = await notesRes.json();
+
+        renderNotes(notes);
+
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+function renderNotes(notes) {
+    const grid = document.getElementById('notesGrid');
+    const emptyState = document.getElementById('emptyState');
+
+    if (notes.length === 0) {
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+    }
+
+    grid.innerHTML = notes.map(note => `
+        <a href="/note/${note.id}" class="group bg-white dark:bg-dark-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all card-hover border border-gray-100 dark:border-dark-border">
+            <div class="h-48 bg-gray-200 dark:bg-dark-hover relative overflow-hidden">
+                ${note.thumbnail 
+                    ? `<img src="/uploads/thumbnails/${note.thumbnail}" alt="${note.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                    : `<div class="w-full h-full flex items-center justify-center text-5xl text-gray-400">
+                        ${note.file_type === 'pdf' ? '📄' : '🖼️'}
+                       </div>`
+                }
+                <div class="absolute top-3 right-3">
+                    <span class="px-2 py-1 bg-white/90 dark:bg-dark-card/90 text-xs font-medium rounded-lg uppercase shadow">
+                        ${note.file_type}
+                    </span>
+                </div>
+            </div>
+            <div class="p-4">
+                <h3 class="font-display font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    ${note.title}
+                </h3>
+                ${note.description ? `
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                        ${note.description}
+                    </p>
+                ` : ''}
+                <div class="flex items-center justify-between mt-4 text-sm text-gray-400">
+                    <span class="flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        ${note.view_count} views
+                    </span>
+                    <span>${formatFileSize(note.file_size)}</span>
+                </div>
+            </div>
+        </a>
+    `).join('');
+
+    anime({
+        targets: '#notesGrid > a',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: anime.stagger(80),
+        duration: 500,
+        easing: 'easeOutCubic'
+    });
+}
+
+// Share functionality
+const shareBtn = document.getElementById('shareBtn');
+const qrModal = document.getElementById('qrModal');
+const closeQrModal = document.getElementById('closeQrModal');
+const shareUrl = document.getElementById('shareUrl');
+const copyUrl = document.getElementById('copyUrl');
+
+shareBtn.addEventListener('click', () => {
+    const url = window.location.href;
+    shareUrl.value = url;
+    
+    const qrContainer = document.getElementById('qrCode');
+    qrContainer.innerHTML = '';
+    new QRCode(qrContainer, {
+        text: url,
+        width: 180,
+        height: 180,
+        colorDark: "#0f766e",
+        colorLight: "#ffffff"
+    });
+    
+    qrModal.classList.remove('hidden');
+});
+
+closeQrModal.addEventListener('click', () => {
+    qrModal.classList.add('hidden');
+});
+
+qrModal.addEventListener('click', (e) => {
+    if (e.target === qrModal) {
+        qrModal.classList.add('hidden');
+    }
+});
+
+copyUrl.addEventListener('click', () => {
+    shareUrl.select();
+    document.execCommand('copy');
+    showToast('Link copied to clipboard!');
+});
+</script>
+{% endblock %}

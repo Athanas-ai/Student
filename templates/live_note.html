@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}Live Editor{% endblock %}
+
+{% block extra_head %}
+<style>
+    #editor {
+        min-height: 400px;
+    }
+    
+    .ql-editor {
+        min-height: 350px;
+        font-size: 16px;
+        line-height: 1.8;
+    }
+    
+    .collaborator-cursor {
+        position: absolute;
+        width: 2px;
+        height: 20px;
+        background-color: #f59e0b;
+        animation: blink 1s infinite;
+    }
+    
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+    }
+    
+    .save-indicator {
+        transition: all 0.3s ease;
+    }
+    
+    .save-indicator.saving {
+        color: #f59e0b;
+    }
+    
+    .save-indicator.saved {
+        color: #10b981;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div class="flex items-center space-x-4">
+            <a href="/live-notes" class="p-2 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </a>
+            <div>
+                <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-white" id="noteTitle">
+                    Loading...
+                </h1>
+                <div class="flex items-center space-x-4 mt-1 text-sm">
+                    <span class="save-indicator flex items-center text-gray-500" id="saveStatus">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Saved
+                    </span>
+                    <span class="flex items-center text-gray-500" id="activeUsers">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        <span id="userCount">1</span> online
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 md:mt-0 flex items-center space-x-3">
+            <button id="shareBtn" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-dark-card hover:bg-gray-200 dark:hover:bg-dark-hover text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                </svg>
+                Share
+            </button>
+        </div>
+    </div>
+
+    <!-- Live Indicator -->
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+        <div class="flex items-center space-x-3">
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+            <span class="text-red-700 dark:text-red-300 text-sm font-medium">
+                Live Session - Changes sync in real-time with all viewers
+            </span>
+        </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="bg-white dark:bg-dark-card rounded-2xl shadow-sm border border-gray-100 dark:border-dark-border overflow-hidden">
+        <div id="editor"></div>
+    </div>
+
+    <!-- Tips -->
+    <div class="mt-6 p-4 bg-gray-50 dark:bg-dark-card rounded-xl border border-gray-100 dark:border-dark-border">
+        <h4 class="font-medium text-gray-900 dark:text-white mb-2 text-sm">💡 Tips</h4>
+        <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+            <li>• All changes are automatically saved</li>
+            <li>• Share the URL to invite classmates</li>
+            <li>• Use the toolbar for formatting</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div id="shareModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card rounded-2xl p-6 max-w-sm w-full">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white">Share this note</h3>
+            <button id="closeShareModal" class="p-2 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div id="qrCode" class="flex justify-center mb-4"></div>
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Scan QR code or copy link below
+        </p>
+        <div class="flex items-center space-x-2">
+            <input type="text" id="shareUrl" readonly class="flex-1 px-3 py-2 bg-gray-100 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg text-sm">
+            <button id="copyUrl" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Copy
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const noteSlug = '{{ note_slug }}';
+let quill;
+let socket;
+let saveTimeout;
+let isRemoteChange = false;
+const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize Quill editor
+    quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Start typing your notes here...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['blockquote', 'code-block'],
+                ['link'],
+                ['clean']
+            ]
+        }
+    });
+
+    try {
+        // Fetch initial note content
+        const res = await fetch(`/api/live-notes/${noteSlug}`);
+        if (!res.ok) throw new Error('Note not found');
+        const note = await res.json();
+
+        document.getElementById('noteTitle').textContent = note.title;
+        
+        if (note.content) {
+            quill.root.innerHTML = note.content;
+        }
+
+        // Initialize Socket.IO
+        initSocket();
+
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Failed to load note', 'error');
+    }
+
+    // Handle content changes
+    quill.on('text-change', (delta, oldDelta, source) => {
+        if (source === 'user' && !isRemoteChange) {
+            // Debounce save
+            clearTimeout(saveTimeout);
+            updateSaveStatus('saving');
+            
+            saveTimeout = setTimeout(() => {
+                const content = quill.root.innerHTML;
+                
+                // Emit to socket for real-time sync
+                if (socket && socket.connected) {
+                    socket.emit('content_change', {
+                        room: noteSlug,
+                        content: content
+                    });
+                }
+                
+                // Save to database
+                saveContent(content);
+            }, 500);
+        }
+    });
+});
+
+function initSocket() {
+    socket = io();
+
+    socket.on('connect', () => {
+        console.log('Connected to server');
+        socket.emit('join_note', { room: noteSlug });
+    });
+
+    socket.on('user_joined', (data) => {
+        document.getElementById('userCount').textContent = data.active_users;
+    });
+
+    socket.on('user_left', (data) => {
+        document.getElementById('userCount').textContent = data.active_users;
+    });
+
+    socket.on('content_updated', (data) => {
+        // Prevent triggering our own change handler
+        isRemoteChange = true;
+        
+        // Save cursor position
+        const selection = quill.getSelection();
+        
+        // Update content
+        quill.root.innerHTML = data.content;
+        
+        // Restore cursor
+        if (selection) {
+            setTimeout(() => {
+                quill.setSelection(selection);
+            }, 0);
+        }
+        
+        isRemoteChange = false;
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+    });
+
+    // Cleanup on page leave
+    window.addEventListener('beforeunload', () => {
+        if (socket) {
+            socket.emit('leave_note', { room: noteSlug });
+        }
+    });
+}
+
+async function saveContent(content) {
+    try {
+        const res = await fetch(`/api/live-notes/${noteSlug}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content })
+        });
+
+        if (res.ok) {
+            updateSaveStatus('saved');
+        } else {
+            throw new Error('Save failed');
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+        updateSaveStatus('error');
+    }
+}
+
+function updateSaveStatus(status) {
+    const statusEl = document.getElementById('saveStatus');
+    statusEl.classList.remove('saving', 'saved');
+    
+    if (status === 'saving') {
+        statusEl.classList.add('saving');
+        statusEl.innerHTML = `
+            <svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Saving...
+        `;
+    } else if (status === 'saved') {
+        statusEl.classList.add('saved');
+        statusEl.innerHTML = `
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Saved
+        `;
+    } else {
+        statusEl.innerHTML = `
+            <svg class="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Error saving
+        `;
+    }
+}
+
+// Share modal
+const shareBtn = document.getElementById('shareBtn');
+const shareModal = document.getElementById('shareModal');
+const closeShareModal = document.getElementById('closeShareModal');
+const shareUrl = document.getElementById('shareUrl');
+const copyUrl = document.getElementById('copyUrl');
+
+shareBtn.addEventListener('click', () => {
+    const url = window.location.href;
+    shareUrl.value = url;
+    
+    const qrContainer = document.getElementById('qrCode');
+    qrContainer.innerHTML = '';
+    new QRCode(qrContainer, {
+        text: url,
+        width: 180,
+        height: 180,
+        colorDark: "#0f766e",
+        colorLight: "#ffffff"
+    });
+    
+    shareModal.classList.remove('hidden');
+});
+
+closeShareModal.addEventListener('click', () => {
+    shareModal.classList.add('hidden');
+});
+
+shareModal.addEventListener('click', (e) => {
+    if (e.target === shareModal) {
+        shareModal.classList.add('hidden');
+    }
+});
+
+copyUrl.addEventListener('click', () => {
+    shareUrl.select();
+    document.execCommand('copy');
+    showToast('Link copied! Share with classmates to collaborate.');
+});
+</script>
+{% endblock %}
+
+

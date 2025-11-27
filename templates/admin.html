@@ -1,0 +1,793 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Login Form (shown when not logged in) -->
+    <div id="loginSection" class="max-w-md mx-auto">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+            </div>
+            <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-white">Admin Login</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Sign in to manage the platform</p>
+        </div>
+        
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+                    <input type="text" id="loginUsername" required
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                    <input type="password" id="loginPassword" required
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+                <button type="submit" class="w-full px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                    Sign In
+                </button>
+            </form>
+            <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+                Default: admin / admin123
+            </p>
+        </div>
+    </div>
+
+    <!-- Admin Panel (shown when logged in) -->
+    <div id="adminSection" class="hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="font-display text-3xl font-bold text-gray-900 dark:text-white">⚙️ Admin Panel</h1>
+                <p class="text-gray-600 dark:text-gray-400">Manage departments, semesters, subjects, and units</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="changePasswordBtn" class="px-4 py-2 bg-gray-100 dark:bg-dark-card hover:bg-gray-200 dark:hover:bg-dark-hover text-gray-700 dark:text-gray-300 rounded-xl transition-colors text-sm">
+                    Change Password
+                </button>
+                <button id="logoutBtn" class="px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl transition-colors text-sm">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex space-x-1 bg-gray-100 dark:bg-dark-card rounded-xl p-1 mb-8 max-w-2xl overflow-x-auto">
+            <button class="tab-btn active flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap" data-tab="departments">
+                Departments
+            </button>
+            <button class="tab-btn flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap" data-tab="subjects">
+                Subjects
+            </button>
+            <button class="tab-btn flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap" data-tab="units">
+                Units
+            </button>
+            <button class="tab-btn flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap" data-tab="notes">
+                Notes
+            </button>
+        </div>
+
+        <!-- Departments Tab -->
+        <div id="departments-tab" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Add Department Form -->
+                <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                    <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">Add Department</h2>
+                    <form id="addDeptForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
+                            <input type="text" id="deptName" required placeholder="e.g., Computer Science"
+                                   class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                            <textarea id="deptDesc" rows="2" placeholder="Brief description..."
+                                      class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon (emoji)</label>
+                            <input type="text" id="deptIcon" placeholder="📚" maxlength="2"
+                                   class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <button type="submit" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                            Add Department
+                        </button>
+                    </form>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                        * 8 semesters will be auto-created for each department
+                    </p>
+                </div>
+
+                <!-- Departments List -->
+                <div class="lg:col-span-2 bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                    <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">All Departments</h2>
+                    <div id="deptsList" class="space-y-3">
+                        <div class="animate-pulse"><div class="h-16 bg-gray-100 dark:bg-dark-hover rounded-xl"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Tab -->
+        <div id="subjects-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Add Subject Form -->
+                <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                    <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">Add Subject</h2>
+                    <form id="addSubjectForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department *</label>
+                            <select id="subjectDept" required
+                                    class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="">Select department</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Semester *</label>
+                            <select id="subjectSem" required disabled
+                                    class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="">Select department first</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject Name *</label>
+                            <input type="text" id="subjectName" required placeholder="e.g., Data Structures"
+                                   class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject Code</label>
+                            <input type="text" id="subjectCode" placeholder="e.g., CS201"
+                                   class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <button type="submit" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                            Add Subject
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Subjects List -->
+                <div class="lg:col-span-2 bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                    <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">All Subjects</h2>
+                    <div class="flex gap-4 mb-4 flex-wrap">
+                        <select id="filterDeptSubjects"
+                                class="px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="">All Departments</option>
+                        </select>
+                        <select id="filterSemSubjects" disabled
+                                class="px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="">All Semesters</option>
+                        </select>
+                    </div>
+                    <div id="subjectsList" class="space-y-3">
+                        <div class="animate-pulse"><div class="h-16 bg-gray-100 dark:bg-dark-hover rounded-xl"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Units Tab -->
+        <div id="units-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Add Unit Form -->
+                <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                    <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">Add Unit</h2>
+                    <form id="addUnitForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department *</label>
+                            <select id="unitDept" required
+                                    class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="">Select department</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Semester *</label>
+                            <select id="unitSem" required disabled
+                                    class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="">Select department first</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject *</label>
+                            <select id="unitSubject" required disabled
+                                    class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                <option value="">Select semester first</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit Name *</label>
+                            <input type="text" id="unitName" required placeholder="e.g., Introduction to Trees"
+                                   class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit Number</label>
+                            <input type="number" id="unitNumber" placeholder="Auto" min="1"
+                                   class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <button type="submit" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                            Add Unit
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Units List -->
+                <div class="lg:col-span-2 bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                    <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">All Units</h2>
+                    <div id="unitsList" class="space-y-3">
+                        <div class="animate-pulse"><div class="h-16 bg-gray-100 dark:bg-dark-hover rounded-xl"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div id="notes-tab" class="tab-content hidden">
+            <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-4">Manage Notes</h2>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Delete uploaded notes. To upload notes, use the <a href="/upload" class="text-primary-600 dark:text-primary-400 hover:underline">Upload page</a>.</p>
+                <div id="notesList" class="space-y-3">
+                    <div class="animate-pulse"><div class="h-16 bg-gray-100 dark:bg-dark-hover rounded-xl"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="passwordModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card rounded-2xl p-6 max-w-sm w-full">
+        <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-4">Change Password</h3>
+        <form id="passwordForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+                <input type="password" id="currentPassword" required
+                       class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                <input type="password" id="newPassword" required minlength="6"
+                       class="w-full px-4 py-2 bg-gray-50 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500">
+            </div>
+            <div class="flex space-x-3">
+                <button type="button" id="cancelPassword" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-hover text-gray-700 dark:text-gray-300 rounded-xl">Cancel</button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl">Change</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card rounded-2xl p-6 max-w-sm w-full">
+        <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-2">Confirm Delete</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4" id="deleteMessage">Are you sure you want to delete this item?</p>
+        <div class="flex space-x-3">
+            <button id="cancelDelete" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-hover text-gray-700 dark:text-gray-300 rounded-xl">Cancel</button>
+            <button id="confirmDelete" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl">Delete</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tab-btn { color: #6b7280; }
+    .tab-btn.active { background: white; color: #0d9488; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .dark .tab-btn.active { background: #1e293b; color: #2dd4bf; }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let adminToken = localStorage.getItem('adminToken');
+let allDepartments = [];
+let deleteCallback = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkLoginStatus();
+});
+
+// ============== AUTH ==============
+
+async function checkLoginStatus() {
+    try {
+        const res = await fetch('/api/admin/status', {
+            headers: adminToken ? { 'X-Admin-Token': adminToken } : {}
+        });
+        const data = await res.json();
+        
+        if (data.logged_in) {
+            showAdminPanel();
+            await loadAllData();
+        } else {
+            showLoginForm();
+        }
+    } catch (error) {
+        showLoginForm();
+    }
+}
+
+function showLoginForm() {
+    document.getElementById('loginSection').classList.remove('hidden');
+    document.getElementById('adminSection').classList.add('hidden');
+}
+
+function showAdminPanel() {
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('adminSection').classList.remove('hidden');
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            adminToken = data.token;
+            localStorage.setItem('adminToken', adminToken);
+            showToast('Login successful!');
+            showAdminPanel();
+            await loadAllData();
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch (error) {
+        showToast('Login failed', 'error');
+    }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    try {
+        await fetch('/api/admin/logout', {
+            method: 'POST',
+            headers: { 'X-Admin-Token': adminToken }
+        });
+    } catch (e) {}
+    
+    localStorage.removeItem('adminToken');
+    adminToken = null;
+    showToast('Logged out');
+    showLoginForm();
+});
+
+// Password change
+document.getElementById('changePasswordBtn').addEventListener('click', () => {
+    document.getElementById('passwordModal').classList.remove('hidden');
+});
+
+document.getElementById('cancelPassword').addEventListener('click', () => {
+    document.getElementById('passwordModal').classList.add('hidden');
+});
+
+document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const current_password = document.getElementById('currentPassword').value;
+    const new_password = document.getElementById('newPassword').value;
+
+    try {
+        const res = await fetch('/api/admin/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Token': adminToken },
+            body: JSON.stringify({ current_password, new_password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            showToast('Password changed!');
+            document.getElementById('passwordModal').classList.add('hidden');
+            document.getElementById('passwordForm').reset();
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch (error) {
+        showToast('Failed to change password', 'error');
+    }
+});
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        btn.classList.add('active');
+        document.getElementById(`${btn.dataset.tab}-tab`).classList.remove('hidden');
+    });
+});
+
+// ============== DATA LOADING ==============
+
+async function loadAllData() {
+    await loadDepartments();
+    await loadSubjects();
+    await loadUnits();
+    await loadNotes();
+}
+
+async function loadDepartments() {
+    const res = await fetch('/api/departments');
+    allDepartments = await res.json();
+    renderDepartments();
+    populateDeptSelects();
+}
+
+function renderDepartments() {
+    const container = document.getElementById('deptsList');
+    if (allDepartments.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">No departments yet</p>';
+        return;
+    }
+    container.innerHTML = allDepartments.map(dept => `
+        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-bg rounded-xl">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">${dept.icon}</span>
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-white">${dept.name}</h3>
+                    <p class="text-sm text-gray-500">${dept.semester_count} semesters</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="/department/${dept.slug}" class="text-primary-600 hover:underline text-sm">View</a>
+                <button onclick="deleteDepartment('${dept.slug}', '${dept.name}')" class="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function populateDeptSelects() {
+    const selects = ['subjectDept', 'filterDeptSubjects', 'unitDept'];
+    selects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const val = select.value;
+        select.innerHTML = '<option value="">Select Department</option>';
+        allDepartments.forEach(d => {
+            select.innerHTML += `<option value="${d.slug}">${d.name}</option>`;
+        });
+        select.value = val;
+    });
+}
+
+// Department form
+document.getElementById('addDeptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('deptName').value.trim();
+    const description = document.getElementById('deptDesc').value.trim();
+    const icon = document.getElementById('deptIcon').value.trim() || '📚';
+
+    try {
+        const res = await fetch('/api/departments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Token': adminToken },
+            body: JSON.stringify({ name, description, icon })
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        showToast('Department added!');
+        document.getElementById('addDeptForm').reset();
+        await loadDepartments();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+});
+
+// ============== SUBJECTS ==============
+
+document.getElementById('subjectDept').addEventListener('change', async (e) => {
+    const semSelect = document.getElementById('subjectSem');
+    semSelect.innerHTML = '<option value="">Select Semester</option>';
+    semSelect.disabled = true;
+    if (!e.target.value) return;
+
+    const res = await fetch(`/api/departments/${e.target.value}/semesters`);
+    const semesters = await res.json();
+    semesters.forEach(s => {
+        semSelect.innerHTML += `<option value="${s.id}">Semester ${s.number}</option>`;
+    });
+    semSelect.disabled = false;
+});
+
+document.getElementById('filterDeptSubjects').addEventListener('change', async (e) => {
+    const semSelect = document.getElementById('filterSemSubjects');
+    semSelect.innerHTML = '<option value="">All Semesters</option>';
+    semSelect.disabled = true;
+    
+    if (e.target.value) {
+        const res = await fetch(`/api/departments/${e.target.value}/semesters`);
+        const semesters = await res.json();
+        semesters.forEach(s => {
+            semSelect.innerHTML += `<option value="${s.id}">Semester ${s.number}</option>`;
+        });
+        semSelect.disabled = false;
+    }
+    await loadSubjects();
+});
+
+document.getElementById('filterSemSubjects').addEventListener('change', loadSubjects);
+
+async function loadSubjects() {
+    const semId = document.getElementById('filterSemSubjects').value;
+    const container = document.getElementById('subjectsList');
+    
+    let subjects = [];
+    if (semId) {
+        const res = await fetch(`/api/semesters/${semId}/subjects`);
+        subjects = await res.json();
+    } else {
+        // Load all subjects
+        for (const dept of allDepartments) {
+            const semRes = await fetch(`/api/departments/${dept.slug}/semesters`);
+            const semesters = await semRes.json();
+            for (const sem of semesters) {
+                const subRes = await fetch(`/api/semesters/${sem.id}/subjects`);
+                const subs = await subRes.json();
+                subs.forEach(s => {
+                    s.department_name = dept.name;
+                    s.semester_number = sem.number;
+                });
+                subjects.push(...subs);
+            }
+        }
+    }
+
+    if (subjects.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">No subjects yet</p>';
+        return;
+    }
+
+    container.innerHTML = subjects.map(s => `
+        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-bg rounded-xl">
+            <div>
+                <h3 class="font-medium text-gray-900 dark:text-white">${s.name}</h3>
+                <p class="text-sm text-gray-500">${s.code || ''} ${s.department_name ? '• ' + s.department_name : ''} ${s.semester_number ? '• Sem ' + s.semester_number : ''} • ${s.unit_count} units</p>
+            </div>
+            <button onclick="deleteSubject(${s.id}, '${s.name}')" class="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+document.getElementById('addSubjectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const semId = document.getElementById('subjectSem').value;
+    const name = document.getElementById('subjectName').value.trim();
+    const code = document.getElementById('subjectCode').value.trim();
+
+    try {
+        const res = await fetch(`/api/semesters/${semId}/subjects`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Token': adminToken },
+            body: JSON.stringify({ name, code })
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        showToast('Subject added!');
+        document.getElementById('addSubjectForm').reset();
+        document.getElementById('subjectSem').disabled = true;
+        await loadSubjects();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+});
+
+// ============== UNITS ==============
+
+document.getElementById('unitDept').addEventListener('change', async (e) => {
+    const semSelect = document.getElementById('unitSem');
+    const subSelect = document.getElementById('unitSubject');
+    semSelect.innerHTML = '<option value="">Select Semester</option>';
+    subSelect.innerHTML = '<option value="">Select Semester first</option>';
+    semSelect.disabled = true;
+    subSelect.disabled = true;
+    if (!e.target.value) return;
+
+    const res = await fetch(`/api/departments/${e.target.value}/semesters`);
+    const semesters = await res.json();
+    semesters.forEach(s => {
+        semSelect.innerHTML += `<option value="${s.id}">Semester ${s.number}</option>`;
+    });
+    semSelect.disabled = false;
+});
+
+document.getElementById('unitSem').addEventListener('change', async (e) => {
+    const subSelect = document.getElementById('unitSubject');
+    subSelect.innerHTML = '<option value="">Select Subject</option>';
+    subSelect.disabled = true;
+    if (!e.target.value) return;
+
+    const res = await fetch(`/api/semesters/${e.target.value}/subjects`);
+    const subjects = await res.json();
+    subjects.forEach(s => {
+        subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+    });
+    subSelect.disabled = false;
+});
+
+async function loadUnits() {
+    const container = document.getElementById('unitsList');
+    let units = [];
+
+    for (const dept of allDepartments) {
+        const semRes = await fetch(`/api/departments/${dept.slug}/semesters`);
+        const semesters = await semRes.json();
+        for (const sem of semesters) {
+            const subRes = await fetch(`/api/semesters/${sem.id}/subjects`);
+            const subjects = await subRes.json();
+            for (const sub of subjects) {
+                const unitRes = await fetch(`/api/subjects/${sub.id}/units`);
+                const subUnits = await unitRes.json();
+                subUnits.forEach(u => {
+                    u.subject_name = sub.name;
+                    u.semester_number = sem.number;
+                    u.department_name = dept.name;
+                });
+                units.push(...subUnits);
+            }
+        }
+    }
+
+    if (units.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">No units yet</p>';
+        return;
+    }
+
+    container.innerHTML = units.slice(0, 50).map(u => `
+        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-bg rounded-xl">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center text-primary-600 font-bold">${u.number}</div>
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-white">${u.name}</h3>
+                    <p class="text-sm text-gray-500">${u.subject_name} • ${u.note_count} notes</p>
+                </div>
+            </div>
+            <button onclick="deleteUnit(${u.id}, '${u.name}')" class="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+        </div>
+    `).join('');
+}
+
+document.getElementById('addUnitForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const subjectId = document.getElementById('unitSubject').value;
+    const name = document.getElementById('unitName').value.trim();
+    const number = document.getElementById('unitNumber').value || undefined;
+
+    try {
+        const res = await fetch(`/api/subjects/${subjectId}/units`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Token': adminToken },
+            body: JSON.stringify({ name, number })
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        showToast('Unit added!');
+        document.getElementById('addUnitForm').reset();
+        document.getElementById('unitSem').disabled = true;
+        document.getElementById('unitSubject').disabled = true;
+        await loadUnits();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+});
+
+// ============== NOTES ==============
+
+async function loadNotes() {
+    const container = document.getElementById('notesList');
+    const res = await fetch('/api/notes/recent?limit=50');
+    const notes = await res.json();
+
+    if (notes.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">No notes uploaded yet</p>';
+        return;
+    }
+
+    container.innerHTML = notes.map(n => `
+        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-bg rounded-xl">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">${n.file_type === 'pdf' ? '📄' : '🖼️'}</span>
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-white">${n.title}</h3>
+                    <p class="text-sm text-gray-500">${n.subject_name} • ${n.view_count} views</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="/note/${n.id}" class="text-primary-600 hover:underline text-sm">View</a>
+                <button onclick="deleteNote(${n.id}, '${n.title.replace(/'/g, "\\'")}')" class="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============== DELETE FUNCTIONS ==============
+
+function showDeleteModal(message, callback) {
+    document.getElementById('deleteMessage').textContent = message;
+    document.getElementById('deleteModal').classList.remove('hidden');
+    deleteCallback = callback;
+}
+
+document.getElementById('cancelDelete').addEventListener('click', () => {
+    document.getElementById('deleteModal').classList.add('hidden');
+    deleteCallback = null;
+});
+
+document.getElementById('confirmDelete').addEventListener('click', async () => {
+    if (deleteCallback) await deleteCallback();
+    document.getElementById('deleteModal').classList.add('hidden');
+    deleteCallback = null;
+});
+
+async function deleteDepartment(slug, name) {
+    showDeleteModal(`Delete "${name}" and ALL its semesters, subjects, units, and notes?`, async () => {
+        const res = await fetch(`/api/departments/${slug}`, {
+            method: 'DELETE',
+            headers: { 'X-Admin-Token': adminToken }
+        });
+        if (res.ok) {
+            showToast('Department deleted');
+            await loadAllData();
+        } else {
+            showToast('Delete failed', 'error');
+        }
+    });
+}
+
+async function deleteSubject(id, name) {
+    showDeleteModal(`Delete "${name}" and ALL its units and notes?`, async () => {
+        const res = await fetch(`/api/subjects/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-Admin-Token': adminToken }
+        });
+        if (res.ok) {
+            showToast('Subject deleted');
+            await loadSubjects();
+        } else {
+            showToast('Delete failed', 'error');
+        }
+    });
+}
+
+async function deleteUnit(id, name) {
+    showDeleteModal(`Delete "${name}" and ALL its notes?`, async () => {
+        const res = await fetch(`/api/units/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-Admin-Token': adminToken }
+        });
+        if (res.ok) {
+            showToast('Unit deleted');
+            await loadUnits();
+        } else {
+            showToast('Delete failed', 'error');
+        }
+    });
+}
+
+async function deleteNote(id, title) {
+    showDeleteModal(`Delete note "${title}"?`, async () => {
+        const res = await fetch(`/api/notes/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-Admin-Token': adminToken }
+        });
+        if (res.ok) {
+            showToast('Note deleted');
+            await loadNotes();
+        } else {
+            showToast('Delete failed', 'error');
+        }
+    });
+}
+</script>
+{% endblock %}

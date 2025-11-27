@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Department{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-6" id="breadcrumb">
+        <a href="/" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <span class="text-gray-900 dark:text-white font-medium" id="deptBreadcrumb">Loading...</span>
+    </nav>
+
+    <!-- Department Header -->
+    <div class="bg-gradient-teal rounded-3xl p-8 mb-8" id="deptHeader">
+        <div class="flex items-start space-x-6">
+            <div class="w-20 h-20 bg-white dark:bg-dark-card rounded-2xl flex items-center justify-center text-4xl shadow-lg" id="deptIcon">
+                📚
+            </div>
+            <div class="flex-1">
+                <h1 class="font-display text-3xl md:text-4xl font-bold text-gray-900 dark:text-white" id="deptName">
+                    Loading...
+                </h1>
+                <p class="mt-2 text-gray-600 dark:text-gray-300 max-w-2xl" id="deptDescription">
+                    Loading department information...
+                </p>
+                <div class="mt-4 flex items-center space-x-4">
+                    <span class="inline-flex items-center px-3 py-1 bg-white/50 dark:bg-dark-card/50 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span id="semesterCount">8</span> Semesters
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Semesters Grid -->
+    <h2 class="font-display text-2xl font-bold text-gray-900 dark:text-white mb-6">Select Semester</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 mb-12" id="semestersGrid">
+        <!-- Loading skeletons -->
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-12 bg-gray-200 dark:bg-dark-hover rounded-xl"></div>
+        </div>
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-12 bg-gray-200 dark:bg-dark-hover rounded-xl"></div>
+        </div>
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-12 bg-gray-200 dark:bg-dark-hover rounded-xl"></div>
+        </div>
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 animate-pulse">
+            <div class="h-12 bg-gray-200 dark:bg-dark-hover rounded-xl"></div>
+        </div>
+    </div>
+
+    <!-- Subjects Section (shown after selecting semester) -->
+    <div id="subjectsSection" class="hidden">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="font-display text-2xl font-bold text-gray-900 dark:text-white">
+                <span id="selectedSemesterTitle">Semester 1</span> Subjects
+            </h2>
+            <button id="backToSemesters" class="text-primary-600 dark:text-primary-400 hover:underline text-sm flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to Semesters
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-6">
+            <div class="relative max-w-md">
+                <input type="text" id="searchInput" placeholder="Search subjects..." 
+                       class="w-full pl-12 pr-4 py-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all">
+                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Subjects Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="subjectsGrid">
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="text-6xl mb-4">📚</div>
+            <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-2">No subjects found</h3>
+            <p class="text-gray-500 dark:text-gray-400">No subjects have been added to this semester yet.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const deptSlug = '{{ dept_slug }}';
+let allSubjects = [];
+let selectedSemesterId = null;
+let semesters = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Fetch department info
+        const deptRes = await fetch(`/api/departments/${deptSlug}`);
+        if (!deptRes.ok) throw new Error('Department not found');
+        const dept = await deptRes.json();
+        
+        // Update header
+        document.getElementById('deptBreadcrumb').textContent = dept.name;
+        document.getElementById('deptIcon').textContent = dept.icon;
+        document.getElementById('deptName').textContent = dept.name;
+        document.getElementById('deptDescription').textContent = dept.description || 'Explore semesters and subjects in this department.';
+        document.getElementById('semesterCount').textContent = dept.semester_count;
+
+        // Fetch semesters
+        const semRes = await fetch(`/api/departments/${deptSlug}/semesters`);
+        semesters = await semRes.json();
+        
+        renderSemesters(semesters);
+
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('semestersGrid').innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <div class="text-6xl mb-4">😕</div>
+                <p class="text-gray-500 dark:text-gray-400">Department not found or an error occurred.</p>
+                <a href="/" class="inline-flex items-center mt-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+                    Go back home
+                </a>
+            </div>
+        `;
+    }
+});
+
+function renderSemesters(semesters) {
+    const grid = document.getElementById('semestersGrid');
+    
+    grid.innerHTML = semesters.map(sem => `
+        <button onclick="selectSemester(${sem.id}, ${sem.number})" 
+                class="group bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 dark:border-dark-border text-center">
+            <div class="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                <span class="font-display text-2xl font-bold text-primary-600 dark:text-primary-400">${sem.number}</span>
+            </div>
+            <h3 class="font-display font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                Sem ${sem.number}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${sem.subject_count} subjects</p>
+        </button>
+    `).join('');
+
+    anime({
+        targets: '#semestersGrid > button',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: anime.stagger(50),
+        duration: 400,
+        easing: 'easeOutCubic'
+    });
+}
+
+async function selectSemester(semesterId, semesterNumber) {
+    selectedSemesterId = semesterId;
+    document.getElementById('selectedSemesterTitle').textContent = `Semester ${semesterNumber}`;
+    
+    // Hide semesters, show subjects
+    document.getElementById('semestersGrid').classList.add('hidden');
+    document.querySelector('h2').classList.add('hidden');
+    document.getElementById('subjectsSection').classList.remove('hidden');
+
+    // Fetch subjects
+    const res = await fetch(`/api/semesters/${semesterId}/subjects`);
+    allSubjects = await res.json();
+    renderSubjects(allSubjects);
+}
+
+document.getElementById('backToSemesters').addEventListener('click', () => {
+    document.getElementById('semestersGrid').classList.remove('hidden');
+    document.querySelector('h2').classList.remove('hidden');
+    document.getElementById('subjectsSection').classList.add('hidden');
+    selectedSemesterId = null;
+});
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    const filtered = allSubjects.filter(s => 
+        s.name.toLowerCase().includes(query) || 
+        (s.code && s.code.toLowerCase().includes(query))
+    );
+    renderSubjects(filtered);
+});
+
+function renderSubjects(subjects) {
+    const grid = document.getElementById('subjectsGrid');
+    const emptyState = document.getElementById('emptyState');
+
+    if (subjects.length === 0) {
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+    }
+
+    grid.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    grid.innerHTML = subjects.map(subject => `
+        <a href="/department/${deptSlug}/semester/${selectedSemesterId}/subject/${subject.slug}" 
+           class="group bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all card-hover border border-gray-100 dark:border-dark-border">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h3 class="font-display text-xl font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                        ${subject.name}
+                    </h3>
+                    ${subject.code ? `
+                        <span class="inline-block mt-1 px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-mono rounded">
+                            ${subject.code}
+                        </span>
+                    ` : ''}
+                </div>
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
+                ${subject.description || 'Explore units and notes for this subject.'}
+            </p>
+            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                ${subject.unit_count} Units
+            </div>
+        </a>
+    `).join('');
+
+    anime({
+        targets: '#subjectsGrid > a',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        delay: anime.stagger(80),
+        duration: 500,
+        easing: 'easeOutCubic'
+    });
+}
+</script>
+{% endblock %}

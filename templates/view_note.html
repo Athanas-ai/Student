@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}View Note{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-6 flex-wrap gap-y-1" id="breadcrumb">
+        <a href="/" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Home</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+        <span class="text-gray-900 dark:text-white font-medium" id="noteBreadcrumb">Loading...</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content - Note Viewer -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-dark-card rounded-2xl shadow-sm border border-gray-100 dark:border-dark-border overflow-hidden">
+                <!-- Note Header -->
+                <div class="p-6 border-b border-gray-100 dark:border-dark-border">
+                    <h1 class="font-display text-2xl md:text-3xl font-bold text-gray-900 dark:text-white" id="noteTitle">
+                        Loading...
+                    </h1>
+                    <p class="mt-2 text-gray-600 dark:text-gray-400" id="noteDescription"></p>
+                    <div class="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <span id="viewCount">0</span> views
+                        </span>
+                        <span class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            <span id="downloadCount">0</span> downloads
+                        </span>
+                        <span class="flex items-center" id="fileInfo">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Loading...
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Note Viewer -->
+                <div class="relative bg-gray-100 dark:bg-dark-bg" id="viewerContainer" style="min-height: 500px;">
+                    <!-- Loading state -->
+                    <div id="loadingViewer" class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="spinner mx-auto mb-4"></div>
+                            <p class="text-gray-500 dark:text-gray-400">Loading document...</p>
+                        </div>
+                    </div>
+
+                    <!-- PDF Viewer -->
+                    <div id="pdfViewer" class="hidden">
+                        <div class="sticky top-0 z-10 bg-gray-200 dark:bg-dark-hover p-3 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <button id="prevPage" class="p-2 hover:bg-gray-300 dark:hover:bg-dark-border rounded-lg transition-colors" disabled>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                </button>
+                                <span class="text-sm text-gray-600 dark:text-gray-300">
+                                    Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                                </span>
+                                <button id="nextPage" class="p-2 hover:bg-gray-300 dark:hover:bg-dark-border rounded-lg transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button id="zoomOut" class="p-2 hover:bg-gray-300 dark:hover:bg-dark-border rounded-lg transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                    </svg>
+                                </button>
+                                <span id="zoomLevel" class="text-sm text-gray-600 dark:text-gray-300 min-w-12 text-center">100%</span>
+                                <button id="zoomIn" class="p-2 hover:bg-gray-300 dark:hover:bg-dark-border rounded-lg transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="pdfContainer" class="overflow-auto p-4" style="max-height: 600px;">
+                            <canvas id="pdfCanvas" class="mx-auto shadow-lg"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Image Viewer -->
+                    <div id="imageViewer" class="hidden p-4">
+                        <img id="noteImage" src="" alt="" class="max-w-full h-auto mx-auto rounded-lg shadow-lg">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Actions Card -->
+            <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-4">Actions</h3>
+                <div class="space-y-3">
+                    <a id="downloadBtn" href="#" class="flex items-center justify-center w-full px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download
+                    </a>
+                    <button id="shareBtn" class="flex items-center justify-center w-full px-4 py-3 bg-gray-100 dark:bg-dark-hover hover:bg-gray-200 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                        </svg>
+                        Share
+                    </button>
+                </div>
+            </div>
+
+            <!-- QR Code Card -->
+            <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-4">Scan to View</h3>
+                <div id="qrCode" class="flex justify-center"></div>
+                <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+                    Scan this QR code to view on mobile
+                </p>
+            </div>
+
+            <!-- File Info Card -->
+            <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+                <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-4">File Information</h3>
+                <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500 dark:text-gray-400">Filename</dt>
+                        <dd class="text-gray-900 dark:text-white font-medium truncate ml-4" id="infoFilename">-</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500 dark:text-gray-400">Type</dt>
+                        <dd class="text-gray-900 dark:text-white font-medium uppercase" id="infoType">-</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500 dark:text-gray-400">Size</dt>
+                        <dd class="text-gray-900 dark:text-white font-medium" id="infoSize">-</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-gray-500 dark:text-gray-400">Uploaded</dt>
+                        <dd class="text-gray-900 dark:text-white font-medium" id="infoUploaded">-</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div id="shareModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card rounded-2xl p-6 max-w-sm w-full">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white">Share this note</h3>
+            <button id="closeShareModal" class="p-2 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div id="modalQrCode" class="flex justify-center mb-4"></div>
+        <div class="flex items-center space-x-2">
+            <input type="text" id="shareUrl" readonly class="flex-1 px-3 py-2 bg-gray-100 dark:bg-dark-bg border border-gray-200 dark:border-dark-border rounded-lg text-sm">
+            <button id="copyUrl" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
+                Copy
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const noteId = {{ note_id }};
+let pdfDoc = null;
+let currentPage = 1;
+let scale = 1.0;
+
+// Set PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Fetch note info
+        const res = await fetch(`/api/notes/${noteId}`);
+        if (!res.ok) throw new Error('Note not found');
+        const note = await res.json();
+
+        // Update page info
+        document.getElementById('noteBreadcrumb').textContent = note.title;
+        document.getElementById('noteTitle').textContent = note.title;
+        document.getElementById('noteDescription').textContent = note.description || '';
+        document.getElementById('viewCount').textContent = note.view_count;
+        document.getElementById('downloadCount').textContent = note.download_count;
+        document.getElementById('fileInfo').innerHTML = `
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            ${note.file_type.toUpperCase()} • ${formatFileSize(note.file_size)}
+        `;
+
+        // Update sidebar info
+        document.getElementById('infoFilename').textContent = note.filename;
+        document.getElementById('infoType').textContent = note.file_type;
+        document.getElementById('infoSize').textContent = formatFileSize(note.file_size);
+        document.getElementById('infoUploaded').textContent = timeAgo(note.uploaded_at);
+
+        // Set download link
+        document.getElementById('downloadBtn').href = `/api/notes/${noteId}/download`;
+
+        // Generate QR code
+        const qrContainer = document.getElementById('qrCode');
+        new QRCode(qrContainer, {
+            text: window.location.href,
+            width: 150,
+            height: 150,
+            colorDark: "#0f766e",
+            colorLight: "#ffffff"
+        });
+
+        // Load content based on file type
+        const fileUrl = `/uploads/${note.stored_filename}`;
+        
+        if (note.file_type === 'pdf') {
+            await loadPDF(fileUrl);
+        } else {
+            loadImage(fileUrl, note.title);
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('loadingViewer').innerHTML = `
+            <div class="text-center">
+                <div class="text-6xl mb-4">😕</div>
+                <p class="text-gray-500 dark:text-gray-400">Note not found or an error occurred.</p>
+                <a href="/" class="inline-flex items-center mt-4 text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+                    Go back home
+                </a>
+            </div>
+        `;
+    }
+});
+
+async function loadPDF(url) {
+    try {
+        pdfDoc = await pdfjsLib.getDocument(url).promise;
+        
+        document.getElementById('totalPages').textContent = pdfDoc.numPages;
+        document.getElementById('loadingViewer').classList.add('hidden');
+        document.getElementById('pdfViewer').classList.remove('hidden');
+
+        renderPage(currentPage);
+
+        // Set up controls
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage(currentPage);
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < pdfDoc.numPages) {
+                currentPage++;
+                renderPage(currentPage);
+            }
+        });
+
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            scale = Math.min(scale + 0.25, 3);
+            document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
+            renderPage(currentPage);
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            scale = Math.max(scale - 0.25, 0.5);
+            document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
+            renderPage(currentPage);
+        });
+
+    } catch (error) {
+        console.error('Error loading PDF:', error);
+        document.getElementById('loadingViewer').innerHTML = `
+            <div class="text-center p-8">
+                <div class="text-6xl mb-4">📄</div>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Unable to display PDF in browser.</p>
+                <a href="/api/notes/${noteId}/download" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                    Download PDF
+                </a>
+            </div>
+        `;
+    }
+}
+
+async function renderPage(pageNum) {
+    const page = await pdfDoc.getPage(pageNum);
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const viewport = page.getViewport({ scale: scale });
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    await page.render({
+        canvasContext: ctx,
+        viewport: viewport
+    }).promise;
+
+    // Update controls
+    document.getElementById('currentPage').textContent = pageNum;
+    document.getElementById('prevPage').disabled = pageNum <= 1;
+    document.getElementById('nextPage').disabled = pageNum >= pdfDoc.numPages;
+}
+
+function loadImage(url, title) {
+    const img = document.getElementById('noteImage');
+    img.src = url;
+    img.alt = title;
+    
+    img.onload = () => {
+        document.getElementById('loadingViewer').classList.add('hidden');
+        document.getElementById('imageViewer').classList.remove('hidden');
+    };
+
+    img.onerror = () => {
+        document.getElementById('loadingViewer').innerHTML = `
+            <div class="text-center p-8">
+                <div class="text-6xl mb-4">🖼️</div>
+                <p class="text-gray-500 dark:text-gray-400">Unable to load image.</p>
+            </div>
+        `;
+    };
+}
+
+// Share modal
+const shareBtn = document.getElementById('shareBtn');
+const shareModal = document.getElementById('shareModal');
+const closeShareModal = document.getElementById('closeShareModal');
+const shareUrl = document.getElementById('shareUrl');
+const copyUrl = document.getElementById('copyUrl');
+
+shareBtn.addEventListener('click', () => {
+    const url = window.location.href;
+    shareUrl.value = url;
+    
+    const modalQr = document.getElementById('modalQrCode');
+    modalQr.innerHTML = '';
+    new QRCode(modalQr, {
+        text: url,
+        width: 180,
+        height: 180,
+        colorDark: "#0f766e",
+        colorLight: "#ffffff"
+    });
+    
+    shareModal.classList.remove('hidden');
+});
+
+closeShareModal.addEventListener('click', () => {
+    shareModal.classList.add('hidden');
+});
+
+shareModal.addEventListener('click', (e) => {
+    if (e.target === shareModal) {
+        shareModal.classList.add('hidden');
+    }
+});
+
+copyUrl.addEventListener('click', () => {
+    shareUrl.select();
+    document.execCommand('copy');
+    showToast('Link copied to clipboard!');
+});
+</script>
+{% endblock %}
+
+

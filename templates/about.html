@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Hero -->
+    <div class="text-center mb-16">
+        <div class="w-20 h-20 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+        </div>
+        <h1 class="font-display text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            About <span class="gradient-text">StudyShare</span>
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            A collaborative platform built by students, for students. Share notes, collaborate in real-time, and help each other succeed.
+        </p>
+    </div>
+
+    <!-- Mission -->
+    <div class="bg-white dark:bg-dark-card rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 dark:border-dark-border mb-12">
+        <h2 class="font-display text-2xl font-bold text-gray-900 dark:text-white mb-4">Our Mission</h2>
+        <p class="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
+            Education should be accessible to everyone. StudyShare eliminates barriers by providing a free, open platform 
+            where students can share their notes and study materials without any registration or login required. 
+            We believe that collaboration leads to better learning outcomes for everyone.
+        </p>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center text-2xl mb-4">
+                📚
+            </div>
+            <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-2">Organized Notes</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Browse notes organized by department, subject, and unit. Find exactly what you need for your studies.
+            </p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center text-2xl mb-4">
+                ⚡
+            </div>
+            <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-2">Real-time Collaboration</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Create live notes and collaborate with classmates in real-time. Type together during lectures or study sessions.
+            </p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center text-2xl mb-4">
+                📱
+            </div>
+            <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-2">QR Code Sharing</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Share notes instantly with QR codes. Perfect for quick sharing in class or study groups.
+            </p>
+        </div>
+
+        <div class="bg-white dark:bg-dark-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-border">
+            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center text-2xl mb-4">
+                🔓
+            </div>
+            <h3 class="font-display text-lg font-semibold text-gray-900 dark:text-white mb-2">No Login Required</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Start sharing immediately without creating an account. Zero barriers to learning.
+            </p>
+        </div>
+    </div>
+
+    <!-- How it Works -->
+    <div class="bg-gradient-teal rounded-3xl p-8 md:p-12 mb-12">
+        <h2 class="font-display text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-14 h-14 bg-white dark:bg-dark-card rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span class="font-display text-2xl font-bold text-primary-600">1</span>
+                </div>
+                <h3 class="font-display font-semibold text-gray-900 dark:text-white mb-2">Browse or Upload</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                    Find notes by department and subject, or upload your own study materials.
+                </p>
+            </div>
+            <div class="text-center">
+                <div class="w-14 h-14 bg-white dark:bg-dark-card rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span class="font-display text-2xl font-bold text-primary-600">2</span>
+                </div>
+                <h3 class="font-display font-semibold text-gray-900 dark:text-white mb-2">View & Download</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                    View notes directly in your browser or download for offline study.
+                </p>
+            </div>
+            <div class="text-center">
+                <div class="w-14 h-14 bg-white dark:bg-dark-card rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span class="font-display text-2xl font-bold text-primary-600">3</span>
+                </div>
+                <h3 class="font-display font-semibold text-gray-900 dark:text-white mb-2">Collaborate Live</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
+                    Create live notes and collaborate with classmates in real-time.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="bg-white dark:bg-dark-card rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 dark:border-dark-border mb-12">
+        <h2 class="font-display text-2xl font-bold text-gray-900 dark:text-white mb-6">Built With</h2>
+        <div class="flex flex-wrap gap-3">
+            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-bg rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300">Flask</span>
+            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-bg rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300">SQLite</span>
+            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-bg rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300">Socket.IO</span>
+            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-bg rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300">TailwindCSS</span>
+            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-bg rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300">Anime.js</span>
+            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-bg rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300">PDF.js</span>
+            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-bg rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300">Quill Editor</span>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center">
+        <h2 class="font-display text-2xl font-bold text-gray-900 dark:text-white mb-4">Ready to Start Learning?</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-8">
+            Join thousands of students sharing knowledge and helping each other succeed.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/" class="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl shadow-lg hover:shadow-primary-500/25 transition-all">
+                Browse Notes
+            </a>
+            <a href="/upload" class="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-dark-hover text-gray-900 dark:text-white font-medium rounded-xl shadow-lg transition-all border border-gray-200 dark:border-dark-border">
+                Share Your Notes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Animate elements on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                anime({
+                    targets: entry.target,
+                    opacity: [0, 1],
+                    translateY: [30, 0],
+                    duration: 600,
+                    easing: 'easeOutCubic'
+                });
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.bg-white, .bg-gradient-teal').forEach(el => {
+        el.style.opacity = '0';
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}
