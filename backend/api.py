@@ -37,15 +37,14 @@ def admin_login():
     """Admin login - only one admin can be logged in at a time."""
     data = request.get_json()
     username = data.get('username')
-    password = data.get('password')
     
-    if not username or not password:
-        return jsonify({'error': 'Username and password required'}), 400
+    if not username:
+        return jsonify({'error': 'Username required'}), 400
     
     admin = Admin.query.filter_by(username=username).first()
     
-    if not admin or not admin.check_password(password):
-        return jsonify({'error': 'Invalid credentials'}), 401
+    if not admin:
+        return jsonify({'error': 'Admin user not found'}), 401
     
     # Check if already logged in elsewhere
     if admin.is_logged_in:
