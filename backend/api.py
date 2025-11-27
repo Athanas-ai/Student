@@ -16,105 +16,6 @@ api = Blueprint('api', __name__, url_prefix='/api')
 
 # ============== Admin Authentication ==============
 
-def admin_required(f):
-    """Decorator to require admin authentication."""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.headers.get('X-Admin-Token') or session.get('admin_token')
-        if not token:
-            return jsonify({'error': 'Admin authentication required'}), 401
-        
-        admin = Admin.query.filter_by(session_token=token, is_logged_in=True).first()
-        if not admin:
-            return jsonify({'error': 'Invalid or expired session'}), 401
-        
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-@api.route('/admin/login', methods=['POST'])
-def admin_login():
-    """Admin login - only one admin can be logged in at a time."""
-    data = request.get_json()
-    username = data.get('username')
-    
-    if not username:
-        return jsonify({'error': 'Username required'}), 400
-    
-    admin = Admin.query.filter_by(username=username).first()
-    
-    if not admin:
-        return jsonify({'error': 'Admin user not found'}), 401
-    
-    # Check if already logged in elsewhere
-    if admin.is_logged_in:
-        return jsonify({'error': 'Admin is already logged in from another session. Please logout first or wait.'}), 403
-    
-    # Generate session token
-    token = uuid.uuid4().hex
-    admin.session_token = token
-    admin.is_logged_in = True
-    admin.last_login = db.func.now()
-    db.session.commit()
-    
-    session['admin_token'] = token
-    
-    return jsonify({
-        'message': 'Login successful',
-        'token': token
-    })
-
-
-@api.route('/admin/logout', methods=['POST'])
-def admin_logout():
-    """Admin logout."""
-    token = request.headers.get('X-Admin-Token') or session.get('admin_token')
-    
-    if token:
-        admin = Admin.query.filter_by(session_token=token).first()
-        if admin:
-            admin.is_logged_in = False
-            admin.session_token = None
-            db.session.commit()
-    
-    session.pop('admin_token', None)
-    return jsonify({'message': 'Logged out successfully'})
-
-
-@api.route('/admin/status', methods=['GET'])
-def admin_status():
-    """Check if admin is logged in."""
-    token = request.headers.get('X-Admin-Token') or session.get('admin_token')
-    
-    if not token:
-        return jsonify({'logged_in': False})
-    
-    admin = Admin.query.filter_by(session_token=token, is_logged_in=True).first()
-    return jsonify({'logged_in': bool(admin)})
-
-
-@api.route('/admin/change-password', methods=['POST'])
-@admin_required
-def change_password():
-    """Change admin password."""
-    data = request.get_json()
-    current_password = data.get('current_password')
-    new_password = data.get('new_password')
-    
-    if not current_password or not new_password:
-        return jsonify({'error': 'Current and new password required'}), 400
-    
-    token = request.headers.get('X-Admin-Token') or session.get('admin_token')
-    admin = Admin.query.filter_by(session_token=token).first()
-    
-    if not admin.check_password(current_password):
-        return jsonify({'error': 'Current password is incorrect'}), 401
-    
-    admin.set_password(new_password)
-    db.session.commit()
-    
-    return jsonify({'message': 'Password changed successfully'})
-
 
 # ============== Department Routes ==============
 
@@ -675,3 +576,4 @@ def get_stats():
         'total_views': db.session.query(db.func.sum(Note.view_count)).scalar() or 0,
         'total_downloads': db.session.query(db.func.sum(Note.download_count)).scalar() or 0
     })
+
